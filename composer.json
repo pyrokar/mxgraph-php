@@ -1,0 +1,18 @@
+{
+    "name": "jgraph/mxgraph-php",
+    "description": "PHP Backend model for mxGraph.",
+    "type": "library",
+    "require-dev": {},
+    "license": "Apache-2.0",
+    "require": {
+        "php": "^7.2",
+        "ext-dom":  "*",
+        "ext-gd": "*",
+        "ext-libxml": "*"
+    },
+    "autoload": {
+        "classmap": [
+            "src"
+        ]
+    }
+}
