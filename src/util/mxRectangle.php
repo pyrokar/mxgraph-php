@@ -93,17 +93,15 @@ class mxRectangle extends mxPoint
      */
     public function add(mxRectangle $rect): void
     {
-        if ($rect) {
-            $minX = min($this->x, $rect->x);
-            $minY = min($this->y, $rect->y);
-            $maxX = max($this->x + $this->width, $rect->x + $rect->width);
-            $maxY = max($this->y + $this->height, $rect->y + $rect->height);
+        $minX = min($this->x, $rect->x);
+        $minY = min($this->y, $rect->y);
+        $maxX = max($this->x + $this->width, $rect->x + $rect->width);
+        $maxY = max($this->y + $this->height, $rect->y + $rect->height);
 
-            $this->x = $minX;
-            $this->y = $minY;
-            $this->width = $maxX - $minX;
-            $this->height = $maxY - $minY;
-        }
+        $this->x = $minX;
+        $this->y = $minY;
+        $this->width = $maxX - $minX;
+        $this->height = $maxY - $minY;
     }
 
     /**

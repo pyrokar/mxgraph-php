@@ -40,7 +40,7 @@ class mxGeometry extends mxRectangle
      * edge does not have a source vertex. Otherwise it is ignored. Default is
      * null.
      *
-     * @var mxPoint;
+     * @var null | mxPoint
      */
     public $sourcePoint;
 
@@ -50,6 +50,8 @@ class mxGeometry extends mxRectangle
      * Defines the target point of the edge. This is used if the corresponding
      * edge does not have a target vertex. Otherwise it is ignored. Default is
      * null.
+     *
+     * @var null | mxPoint
      */
     public $targetPoint;
 
@@ -115,7 +117,7 @@ class mxGeometry extends mxRectangle
      *
      * @return mxPoint
      */
-    public function getTerminalPoint($isSource): mxPoint
+    public function getTerminalPoint($isSource): ?mxPoint
     {
         return ($isSource) ? $this->sourcePoint : $this->targetPoint;
     }

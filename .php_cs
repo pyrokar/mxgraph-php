@@ -18,6 +18,7 @@ return PhpCsFixer\Config::create()
 		'no_php4_constructor' => true,
 		'phpdoc_add_missing_param_annotation' => true,
 		'no_superfluous_phpdoc_tags' => false,
+		'phpdoc_no_empty_return' => false,
 		'strict_param' => true,
 	])
 	->setFinder($finder);

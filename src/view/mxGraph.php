@@ -189,19 +189,17 @@ class mxGraph
      *
      * @return string
      */
-    public function getLabel($cell): string
+    public function getLabel(mxCell $cell): string
     {
         $result = '';
 
-        if ($cell) {
-            $state = $this->view->getState($cell);
-            $style = (null !== $state) ?
-                $state->style : $this->getCellStyle($cell);
+        $state = $this->view->getState($cell);
+        $style = (null !== $state) ?
+            $state->style : $this->getCellStyle($cell);
 
-            if ($this->labelsVisible &&
-                !mxUtils::getValue($style, mxConstants::$STYLE_NOLABEL, false)) {
-                $result = $this->convertValueToString($cell);
-            }
+        if ($this->labelsVisible &&
+            !mxUtils::getValue($style, mxConstants::$STYLE_NOLABEL, false)) {
+            $result = $this->convertValueToString($cell);
         }
 
         return $result;

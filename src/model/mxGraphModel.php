@@ -819,7 +819,7 @@ class mxGraphModel extends mxEventSource
      *
      * @return mxCell
      */
-    public function getTerminal(mxCell $edge, bool $source): mxCell
+    public function getTerminal(mxCell $edge, bool $source): ?mxCell
     {
         return $edge->getTerminal($source);
     }

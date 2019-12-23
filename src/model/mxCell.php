@@ -91,6 +91,8 @@ class mxCell
      * Variable: source.
      *
      * Reference to the source terminal.
+     *
+     * @var null | mxCell
      */
     public $source;
 
@@ -98,6 +100,8 @@ class mxCell
      * Variable: target.
      *
      * Reference to the target terminal.
+     *
+     * @var null | mxCell
      */
     public $target;
 

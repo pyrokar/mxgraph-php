@@ -396,7 +396,7 @@ class mxCodec
      *
      * @return mxCell
      */
-    public function decodeCell($node, $restoreStructures = true): mxCell
+    public function decodeCell($node, $restoreStructures = true): ?mxCell
     {
         $cell = null;
 
