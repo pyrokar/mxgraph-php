@@ -64,16 +64,16 @@ class mxGraphViewImageReader
      *
      * Constructs a new image graph view reader.
      *
-     * @param null|mixed $background
-     * @param mixed      $border
+     * @param string $background
+     * @param int    $border
      */
-    public function __construct($background = null, $border = 0)
+    public function __construct(string $background = null, int $border = 0)
     {
         $this->parser = xml_parser_create();
 
         xml_parser_set_option($this->parser, XML_OPTION_CASE_FOLDING, 0);
         xml_set_object($this->parser, $this);
-        xml_set_element_handler($this->parser, 'startElement', 'endElement');
+        xml_set_element_handler($this->parser, [$this, 'startElement'], [$this, 'endElement']);
 
         $this->background = $background;
         $this->border = $border;
@@ -85,6 +85,8 @@ class mxGraphViewImageReader
      * Returns the canvas to be used for rendering.
      *
      * @param mixed $attrs
+     *
+     * @return mxGdCanvas
      */
     public function createCanvas($attrs)
     {
@@ -170,6 +172,8 @@ class mxGraphViewImageReader
      *
      * @param mixed $state
      * @param mixed $edge
+     *
+     * @return null|mixed
      */
     public function parseState($state, $edge)
     {
@@ -221,6 +225,8 @@ class mxGraphViewImageReader
      * <mxPoints>.
      *
      * @param mixed $str
+     *
+     * @return array
      */
     public function parsePoints($str)
     {
@@ -283,10 +289,12 @@ class mxGraphViewImageReader
      *
      * Creates the image for the given display XML string.
      *
-     * @param mixed      $string
-     * @param null|mixed $background
+     * @param string $string
+     * @param string $background
+     *
+     * @return false | resource
      */
-    public static function convert($string, $background = null)
+    public static function convert(string $string, string $background = null)
     {
         $viewReader = new mxGraphViewImageReader($background);
         $viewReader->read($string);
@@ -299,10 +307,12 @@ class mxGraphViewImageReader
      *
      * Creates the image for the given display XML file.
      *
-     * @param mixed      $filename
-     * @param null|mixed $background
+     * @param string $filename
+     * @param string $background
+     *
+     * @return false | resource
      */
-    public static function convertFile($filename, $background = null)
+    public static function convertFile(string $filename, string $background = null)
     {
         $viewReader = new mxGraphViewImageReader($background);
         $viewReader->readFile($filename);

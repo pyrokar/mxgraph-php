@@ -387,7 +387,7 @@ class mxCell
      *
      * parent - <mxCell> that represents the new parent.
      *
-     * @param mxCell $parent
+     * @param null | mxCell $parent
      */
     public function setParent($parent): void
     {
@@ -405,6 +405,8 @@ class mxCell
      * returned.
      *
      * @param bool $source
+     *
+     * @return null|mxCell
      */
     public function getTerminal(bool $source)
     {
@@ -541,19 +543,17 @@ class mxCell
      * index - Integer that specifies the index of the child to be
      * removed.
      *
-     * @param mixed $index
+     * @param int $index
      *
-     * @return null|mixed
+     * @return null|mxCell
      */
-    public function remove($index)
+    public function remove($index): ?mxCell
     {
-        if (null != $this->children && $index >= 0) {
+        if ($index >= 0) {
             $child = $this->getChildAt($index);
 
-            if (null != $child) {
-                array_splice($this->children, $index, 1);
-                $child->setParent(null);
-            }
+            array_splice($this->children, $index, 1);
+            $child->setParent(null);
 
             return $child;
         }

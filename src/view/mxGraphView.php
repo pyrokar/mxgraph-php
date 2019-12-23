@@ -152,22 +152,21 @@ class mxGraphView extends mxEventSource
      * Returns the bounding for for an array of cells or null, if no cells are
      * specified.
      *
-     * @param mixed $cells
-     * @param mixed $boundingBox
+     * @param mxCell[] $cells
+     * @param bool     $boundingBox
      *
      * @return null|mxRectangle
      */
-    public function getBounds($cells, $boundingBox = false)
+    public function getBounds(array $cells, bool $boundingBox = false): ?mxRectangle
     {
-        $cellCount = count($cells);
         $result = null;
 
-        if ($cellCount > 0) {
+        if (count($cells) > 0) {
             $model = $this->graph->getModel();
 
-            for ($i = 0; $i < $cellCount; ++$i) {
-                if ($model->isVertex($cells[$i]) || $model->isEdge($cells[$i])) {
-                    $state = $this->getState($cells[$i]);
+            foreach ($cells as $cell) {
+                if ($model->isVertex($cell) || $model->isEdge($cell)) {
+                    $state = $this->getState($cell);
 
                     if (null != $state) {
                         $bounds = ($boundingBox) ? $state->boundingBox : $state;

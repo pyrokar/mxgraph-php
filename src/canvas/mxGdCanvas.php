@@ -62,6 +62,8 @@ class mxGdCanvas
      * Variable: image.
      *
      * Holds the image.
+     *
+     * @var false | resource
      */
     public $image;
 
@@ -404,6 +406,8 @@ class mxGdCanvas
      * Function: getImage.
      *
      * Returns an image that represents this canvas.
+     *
+     * @return false | resource
      */
     public function getImage()
     {
@@ -928,31 +932,31 @@ class mxGdCanvas
                 $dx = mxConstants::$SHADOW_OFFSETX;
                 $dy = mxConstants::$SHADOW_OFFSETY;
 
-                imagefilledellipse($this->image, $x + 0.2 * $w + $dx, $y + 0.42 * $h + $dy, 0.3 * $w, 0.29 * $h, $this->shadowColor);
-                imagefilledellipse($this->image, $x + 0.4 * $w + $dx, $y + 0.25 * $h + $dy, 0.4 * $w, 0.4 * $h, $this->shadowColor);
-                imagefilledellipse($this->image, $x + 0.75 * $w + $dx, $y + 0.35 * $h + $dy, 0.5 * $w, 0.4 * $h, $this->shadowColor);
-                imagefilledellipse($this->image, $x + 0.2 * $w + $dx, $y + 0.65 * $h + $dy, 0.3 * $w, 0.3 * $h, $this->shadowColor);
-                imagefilledellipse($this->image, $x + 0.55 * $w + $dx, $y + 0.62 * $h + $dy, 0.6 * $w, 0.6 * $h, $this->shadowColor);
-                imagefilledellipse($this->image, $x + 0.88 * $w + $dx, $y + 0.63 * $h + $dy, 0.3 * $w, 0.3 * $h, $this->shadowColor);
+                imagefilledellipse($this->image, (int) ($x + 0.2 * $w + $dx), (int) ($y + 0.42 * $h + $dy), (int) (0.3 * $w), (int) (0.29 * $h), $this->shadowColor);
+                imagefilledellipse($this->image, (int) ($x + 0.4 * $w + $dx), (int) ($y + 0.25 * $h + $dy), (int) (0.4 * $w), (int) (0.4 * $h), $this->shadowColor);
+                imagefilledellipse($this->image, (int) ($x + 0.75 * $w + $dx), (int) ($y + 0.35 * $h + $dy), (int) (0.5 * $w), (int) (0.4 * $h), $this->shadowColor);
+                imagefilledellipse($this->image, (int) ($x + 0.2 * $w + $dx), (int) ($y + 0.65 * $h + $dy), (int) (0.3 * $w), (int) (0.3 * $h), $this->shadowColor);
+                imagefilledellipse($this->image, (int) ($x + 0.55 * $w + $dx), (int) ($y + 0.62 * $h + $dy), (int) (0.6 * $w), (int) (0.6 * $h), $this->shadowColor);
+                imagefilledellipse($this->image, (int) ($x + 0.88 * $w + $dx), (int) ($y + 0.63 * $h + $dy), (int) (0.3 * $w), (int) (0.3 * $h), $this->shadowColor);
             }
 
             $fill = $this->getColor($fill);
-            imagefilledellipse($this->image, $x + 0.2 * $w, $y + 0.42 * $h, 0.3 * $w, 0.29 * $h, $fill);
-            imagefilledellipse($this->image, $x + 0.4 * $w, $y + 0.25 * $h, 0.4 * $w, 0.4 * $h, $fill);
-            imagefilledellipse($this->image, $x + 0.75 * $w, $y + 0.35 * $h, 0.5 * $w, 0.4 * $h, $fill);
-            imagefilledellipse($this->image, $x + 0.2 * $w, $y + 0.65 * $h, 0.3 * $w, 0.3 * $h, $fill);
-            imagefilledellipse($this->image, $x + 0.55 * $w, $y + 0.62 * $h, 0.6 * $w, 0.6 * $h, $fill);
-            imagefilledellipse($this->image, $x + 0.88 * $w, $y + 0.63 * $h, 0.3 * $w, 0.3 * $h, $fill);
+            imagefilledellipse($this->image, (int) ($x + 0.2 * $w), (int) ($y + 0.42 * $h), (int) (.3 * $w), (int) (0.29 * $h), $fill);
+            imagefilledellipse($this->image, (int) ($x + 0.4 * $w), (int) ($y + 0.25 * $h), (int) (0.4 * $w), (int) (0.4 * $h), $fill);
+            imagefilledellipse($this->image, (int) ($x + 0.75 * $w), (int) ($y + 0.35 * $h), (int) (0.5 * $w), (int) (0.4 * $h), $fill);
+            imagefilledellipse($this->image, (int) ($x + 0.2 * $w), (int) ($y + 0.65 * $h), (int) (0.3 * $w), (int) (0.3 * $h), $fill);
+            imagefilledellipse($this->image, (int) ($x + 0.55 * $w), (int) ($y + 0.62 * $h), (int) (0.6 * $w), (int) (0.6 * $h), $fill);
+            imagefilledellipse($this->image, (int) ($x + 0.88 * $w), (int) ($y + 0.63 * $h), (int) (0.3 * $w), (int) (0.3 * $h), $fill);
         }
 
         if (isset($stroke)) {
             $stroke = $this->getColor($stroke);
-            imagearc($this->image, $x + 0.2 * $w, $y + 0.42 * $h, 0.3 * $w, 0.29 * $h, 125, 270, $stroke);
-            imagearc($this->image, $x + 0.4 * $w, $y + 0.25 * $h, 0.4 * $w, 0.4 * $h, 170, 345, $stroke);
-            imagearc($this->image, $x + 0.75 * $w, $y + 0.35 * $h, 0.5 * $w, 0.4 * $h, 230, 55, $stroke);
-            imagearc($this->image, $x + 0.2 * $w, $y + 0.65 * $h, 0.3 * $w, 0.3 * $h, 50, 235, $stroke);
-            imagearc($this->image, $x + 0.55 * $w, $y + 0.62 * $h, 0.6 * $w, 0.6 * $h, 33, 145, $stroke);
-            imagearc($this->image, $x + 0.88 * $w, $y + 0.63 * $h, 0.3 * $w, 0.3 * $h, 290, 120, $stroke);
+            imagearc($this->image, (int) ($x + 0.2 * $w), (int) ($y + 0.42 * $h), (int) (0.3 * $w), (int) (0.29 * $h), 125, 270, $stroke);
+            imagearc($this->image, (int) ($x + 0.4 * $w), (int) ($y + 0.25 * $h), (int) (0.4 * $w), (int) (0.4 * $h), 170, 345, $stroke);
+            imagearc($this->image, (int) ($x + 0.75 * $w), (int) ($y + 0.35 * $h), (int) (0.5 * $w), (int) (0.4 * $h), 230, 55, $stroke);
+            imagearc($this->image, (int) ($x + 0.2 * $w), (int) ($y + 0.65 * $h), (int) (0.3 * $w), (int) (0.3 * $h), 50, 235, $stroke);
+            imagearc($this->image, (int) ($x + 0.55 * $w), (int) ($y + 0.62 * $h), (int) (0.6 * $w), (int) (0.6 * $h), 33, 145, $stroke);
+            imagearc($this->image, (int) ($x + 0.88 * $w), (int) ($y + 0.63 * $h), (int) (0.3 * $w), (int) (0.3 * $h), 290, 120, $stroke);
         }
     }
 
@@ -976,30 +980,30 @@ class mxGdCanvas
                 $dx = mxConstants::$SHADOW_OFFSETX;
                 $dy = mxConstants::$SHADOW_OFFSETY;
 
-                imagefilledellipse($this->image, $x + 0.5 * $w + $dx, $y + 0.2 * $h + $dy, 0.4 * $w, 0.4 * $h, $this->shadowColor);
-                imagefilledellipse($this->image, $x + 0.2 * $w + $dx, $y + 0.6 * $h + $dy, 0.4 * $w, 0.4 * $h, $this->shadowColor);
-                imagefilledellipse($this->image, $x + 0.8 * $w + $dx, $y + 0.6 * $h + $dy, 0.4 * $w, 0.4 * $h, $this->shadowColor);
-                imagefilledrectangle($this->image, $x + 0.2 * $w + $dx, $y + 0.4 * $h + $dy, $x + 0.8 * $w + $dx, $y + 0.6 * $h + $dy, $this->shadowColor);
-                imagefilledrectangle($this->image, $x + $dx, $y + 0.6 * $h + $dy, $x + $w + $dx, $y + $h + $dy, $this->shadowColor);
+                imagefilledellipse($this->image, (int) ($x + 0.5 * $w + $dx), (int) ($y + 0.2 * $h + $dy), (int) (0.4 * $w), (int) (0.4 * $h), $this->shadowColor);
+                imagefilledellipse($this->image, (int) ($x + 0.2 * $w + $dx), (int) ($y + 0.6 * $h + $dy), (int) (0.4 * $w), (int) (0.4 * $h), $this->shadowColor);
+                imagefilledellipse($this->image, (int) ($x + 0.8 * $w + $dx), (int) ($y + 0.6 * $h + $dy), (int) (0.4 * $w), (int) (0.4 * $h), $this->shadowColor);
+                imagefilledrectangle($this->image, (int) ($x + 0.2 * $w + $dx), (int) ($y + 0.4 * $h + $dy), (int) ($x + 0.8 * $w + $dx), (int) ($y + 0.6 * $h + $dy), $this->shadowColor);
+                imagefilledrectangle($this->image, (int) ($x + $dx), (int) ($y + 0.6 * $h + $dy), (int) ($x + $w + $dx), (int) ($y + $h + $dy), $this->shadowColor);
             }
 
             $fill = $this->getColor($fill);
-            imagefilledellipse($this->image, $x + 0.5 * $w, $y + 0.2 * $h, 0.4 * $w, 0.4 * $h, $fill);
-            imagefilledellipse($this->image, $x + 0.2 * $w, $y + 0.6 * $h, 0.4 * $w, 0.4 * $h, $fill);
-            imagefilledellipse($this->image, $x + 0.8 * $w, $y + 0.6 * $h, 0.4 * $w, 0.4 * $h, $fill);
-            imagefilledrectangle($this->image, $x + 0.2 * $w, $y + 0.4 * $h, $x + 0.8 * $w, $y + 0.6 * $h, $fill);
-            imagefilledrectangle($this->image, $x, $y + 0.6 * $h, $x + $w, $y + $h, $fill);
+            imagefilledellipse($this->image, (int) ($x + 0.5 * $w), (int) ($y + 0.2 * $h), (int) (0.4 * $w), (int) (0.4 * $h), $fill);
+            imagefilledellipse($this->image, (int) ($x + 0.2 * $w), (int) ($y + 0.6 * $h), (int) (0.4 * $w), (int) (0.4 * $h), $fill);
+            imagefilledellipse($this->image, (int) ($x + 0.8 * $w), (int) ($y + 0.6 * $h), (int) (0.4 * $w), (int) (0.4 * $h), $fill);
+            imagefilledrectangle($this->image, (int) ($x + 0.2 * $w), (int) ($y + 0.4 * $h), (int) ($x + 0.8 * $w), (int) ($y + 0.6 * $h), $fill);
+            imagefilledrectangle($this->image, (int) ($x), (int) ($y + 0.6 * $h), (int) ($x + $w), (int) ($y + $h), $fill);
         }
 
         if (null != $stroke) {
             $stroke = $this->getColor($stroke);
-            imageellipse($this->image, $x + 0.5 * $w, $y + 0.2 * $h, 0.4 * $w, 0.4 * $h, $stroke);
-            imageline($this->image, $x + 0.2 * $w, $y + 0.4 * $h, $x + 0.8 * $w, $y + 0.4 * $h, $stroke);
-            imagearc($this->image, $x + 0.2 * $w, $y + 0.6 * $h, 0.4 * $w, 0.4 * $h, 180, 270, $stroke);
-            imagearc($this->image, $x + 0.8 * $w, $y + 0.6 * $h, 0.4 * $w, 0.4 * $h, 270, 360, $stroke);
-            imageline($this->image, $x, $y + 0.6 * $h, $x, $y + $h, $stroke);
-            imageline($this->image, $x, $y + $h, $x + $w, $y + $h, $stroke);
-            imageline($this->image, $x + $w, $y + $h, $x + $w, $y + 0.6 * $h, $stroke);
+            imageellipse($this->image, (int) ($x + 0.5 * $w), (int) ($y + 0.2 * $h), (int) (0.4 * $w), (int) (0.4 * $h), $stroke);
+            imageline($this->image, (int) ($x + 0.2 * $w), (int) ($y + 0.4 * $h), (int) ($x + 0.8 * $w), (int) ($y + 0.4 * $h), $stroke);
+            imagearc($this->image, (int) ($x + 0.2 * $w), (int) ($y + 0.6 * $h), (int) (0.4 * $w), (int) (0.4 * $h), 180, 270, $stroke);
+            imagearc($this->image, (int) ($x + 0.8 * $w), (int) ($y + 0.6 * $h), (int) (0.4 * $w), (int) (0.4 * $h), 270, 360, $stroke);
+            imageline($this->image, (int) ($x), (int) ($y + 0.6 * $h), (int) ($x), (int) ($y + $h), $stroke);
+            imageline($this->image, (int) ($x), (int) ($y + $h), (int) ($x + $w), (int) ($y + $h), $stroke);
+            imageline($this->image, (int) ($x + $w), (int) ($y + $h), (int) ($x + $w), (int) ($y + 0.6 * $h), $stroke);
         }
     }
 
@@ -1443,7 +1447,7 @@ class mxGdCanvas
         } elseif ('none' === $hex) {
             $result = null;
         } else {
-            $rgb = array_map('hexdec', explode('|', wordwrap(substr($hex, 1), 2, '|', 1)));
+            $rgb = array_map('hexdec', explode('|', wordwrap(substr($hex, 1), 2, '|', true)));
 
             if (count($rgb) > 2) {
                 $result = imagecolorallocate($this->image, $rgb[0], $rgb[1], $rgb[2]);
@@ -1510,7 +1514,7 @@ class mxGdCanvas
      *
      * @return false|resource
      */
-    public static function drawGraph($graph, $clip = null, $bg = null)
+    public static function drawGraph(mxGraph $graph, $clip = null, $bg = null)
     {
         if (!isset($clip)) {
             $clip = $graph->getGraphBounds();
@@ -1521,8 +1525,8 @@ class mxGdCanvas
         // $y = round($clip->y);
         // $width = round($clip->width - $x + $clip->x) + 1;
         // $height = round($clip->height - $y + $clip->y) + 1;
-        $width = round($clip->width + $clip->x) + 1;
-        $height = round($clip->width + $clip->x) + 1;
+        $width = (int) round($clip->width + $clip->x) + 1;
+        $height = (int) round($clip->width + $clip->x) + 1;
 
         $canvas = new mxGdCanvas($width, $height, $graph->view->scale, $bg);
 

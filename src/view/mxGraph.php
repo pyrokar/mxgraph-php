@@ -765,14 +765,14 @@ class mxGraph
      * Returns the bounds of the given cell including all connected edges
      * if includeEdge is true.
      *
-     * @param mxCell      $cell
-     * @param bool        $includeEdges
-     * @param bool        $includeDescendants
-     * @param mxRectangle $boundingBox
+     * @param mxCell $cell
+     * @param bool   $includeEdges
+     * @param bool   $includeDescendants
+     * @param bool   $boundingBox
      *
      * @return mxRectangle
      */
-    public function getCellBounds(mxCell $cell, bool $includeEdges = false, bool $includeDescendants = false, mxRectangle $boundingBox = null): mxRectangle
+    public function getCellBounds(mxCell $cell, bool $includeEdges = false, bool $includeDescendants = false, bool $boundingBox = false): mxRectangle
     {
         $cells = [$cell];
 

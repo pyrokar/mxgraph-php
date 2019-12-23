@@ -31,7 +31,7 @@ class mxHtmlCanvas extends mxGdCanvas
      */
     public function __construct($scale = 1, $basePath = '')
     {
-        parent::__construct(null, null, $scale, null, $basePath);
+        parent::__construct(0, 0, $scale, null, $basePath);
         $this->html = '';
     }
 
@@ -40,7 +40,7 @@ class mxHtmlCanvas extends mxGdCanvas
      *
      * Gets the HTML that represents the canvas.
      */
-    public function getHtml()
+    public function getHtml(): string
     {
         return $this->html;
     }
@@ -51,8 +51,10 @@ class mxHtmlCanvas extends mxGdCanvas
      * Adds the specified string to the output.
      *
      * @param mixed $string
+     *
+     * @return string
      */
-    public function out($string)
+    public function out($string): string
     {
         return $this->html .= "{$string}\n";
     }
@@ -78,7 +80,7 @@ class mxHtmlCanvas extends mxGdCanvas
         $x0 = $tmpX;
         $y0 = $tmpY;
 
-        if (0 == $w || 0 == $h) {
+        if (0 === $w || 0 === $h) {
             $style = 'position:absolute;'.
                 'overflow:hidden;'.
                 'left:'.$x0.'px;'.
@@ -214,11 +216,13 @@ class mxHtmlCanvas extends mxGdCanvas
      *
      * Draws the given graph using this canvas.
      *
-     * @param mixed      $graph
+     * @param mxGraph    $graph
      * @param null|mixed $clip
      * @param null|mixed $bg
+     *
+     * @return string
      */
-    public static function drawGraph($graph, $clip = null, $bg = null)
+    public static function drawGraph(mxGraph $graph, $clip = null, $bg = null): string
     {
         $graph->view->validate();
 
