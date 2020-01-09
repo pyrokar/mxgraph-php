@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace MxGraph;
 
 use DOMElement;
+use Safe\Exceptions\StringsException;
 
 /**
  * Copyright (c) 2006-2013, Gaudenz Alder.
@@ -94,35 +95,36 @@ class mxStylesheetCodec extends mxObjectCodec
     /**
      * Override <mxObjectCodec.decode>.
      *
-     * @param mixed      $dec
-     * @param mixed      $node
+     * @param mxCodec    $dec
+     * @param DOMElement $node
      * @param null|mixed $into
+     *
+     * @throws StringsException
      *
      * @return null|mixed
      */
-    public function decode($dec, $node, &$into = null)
+    public function decode(mxCodec $dec, DOMElement $node, &$into = null)
     {
         $id = $node->getAttribute('id');
-        $obj = (in_array($id, $dec->objects, true)) ? $dec->objects[$id] : null;
+        $obj = $dec->objects[$id] ?? null;
 
-        if (!isset($obj)) {
-            if (isset($into)) {
+        if (!$obj) {
+            if ($into) {
                 $obj = $into;
-            } else {
+            } elseif (!is_array($this->template)) {
                 $tmp = get_class($this->template);
                 $obj = new $tmp();
             }
 
-            if (isset($id)) {
+            if ('' !== $id) {
                 $dec->putObject($id, $obj);
             }
         }
 
         $node = $node->firstChild;
 
-        while (isset($node)) {
-            if (!$this->processInclude($dec, $node, $obj) &&
-                'add' === $node->nodeName) {
+        while ($node instanceof DOMElement) {
+            if (!$this->processInclude($dec, $node, $obj) && 'add' === $node->nodeName) {
                 $as = $node->getAttribute('as');
 
                 if (strlen($as) > 0) {
@@ -139,26 +141,24 @@ class mxStylesheetCodec extends mxObjectCodec
 
                     $entry = $node->firstChild;
 
-                    while (isset($entry)) {
-                        if (XML_ELEMENT_NODE == $entry->nodeType) {
-                            $key = $entry->getAttribute('as');
+                    while ($entry instanceof DOMElement) {
+                        $key = $entry->getAttribute('as');
 
-                            if ('add' == $entry->nodeName) {
-                                $text = $entry->textContent;
-                                $value = null;
+                        if ('add' === $entry->nodeName) {
+                            $text = $entry->textContent;
+                            $value = null;
 
-                                if (isset($text) && strlen($text) > 0) {
-                                    $value = mxUtils::evaluate($text);
-                                } else {
-                                    $value = $entry->getAttribute('value');
-                                }
-
-                                if (null != $value) {
-                                    $style[$key] = $value;
-                                }
-                            } elseif ('remove' == $entry->nodeName) {
-                                unset($style[$key]);
+                            if ('' !== $text) {
+                                $value = mxUtils::evaluate($text);
+                            } else {
+                                $value = $entry->getAttribute('value');
                             }
+
+                            if ($value) {
+                                $style[$key] = $value;
+                            }
+                        } elseif ('remove' === $entry->nodeName) {
+                            unset($style[$key]);
                         }
 
                         $entry = $entry->nextSibling;

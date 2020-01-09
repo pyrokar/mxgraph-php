@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MxGraph;
 
+use DOMNode;
 use Exception;
 
 /**
@@ -183,7 +184,7 @@ class mxGraph
     {
         $value = $this->model->getValue($cell);
 
-        if (mxUtils::isNode($value)) {
+        if ($value instanceof DOMNode) {
             return $value->nodeName;
         }
 
@@ -382,8 +383,8 @@ class mxGraph
                 $comma = strpos($image, ',');
 
                 if (false !== $comma) {
-                    $image = substr($image, 0, $comma).';base64,'.
-                        substr($image, $comma + 1);
+                    $image = \Safe\substr($image, 0, $comma).';base64,'.
+                        \Safe\substr($image, $comma + 1);
                 }
 
                 $style[mxConstants::$STYLE_IMAGE] = $image;

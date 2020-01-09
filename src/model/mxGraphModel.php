@@ -466,14 +466,12 @@ class mxGraphModel extends mxEventSource
      * cell - <mxCell> that specifies the cell that has been added.
      *
      * @param mxCell $cell
+     *
+     * @throws Exception
      */
-    public function cellAdded(mxCell $cell = null): void
+    public function cellAdded(mxCell $cell): void
     {
-        if (!$cell) {
-            return;
-        }
-
-        if ($this->createIds && null === $cell->getId()) {
+        if ($this->createIds && !$cell->hasId()) {
             $cell->setId($this->createId($cell));
         }
 
@@ -674,6 +672,8 @@ class mxGraphModel extends mxEventSource
      *
      * @param mxCell $cell1
      * @param mxCell $cell2
+     *
+     * @throws \Safe\Exceptions\StringsException
      *
      * @return mxCell
      */
@@ -1367,7 +1367,7 @@ class mxGraphModel extends mxEventSource
             for ($i = 0; $i < $childCount; ++$i) {
                 $cell = $from->getChildAt($i);
                 $id = $cell->getId();
-                $target = (isset($id) && (!$this->isEdge($cell) || !$cloneAllEdges)) ?
+                $target = ($id && (!$this->isEdge($cell) || !$cloneAllEdges)) ?
                         $this->getCell($id) : null;
 
                 // Clones and adds the child if no cell exists for the id

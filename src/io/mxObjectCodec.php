@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MxGraph;
 
+use DOMElement;
 use Exception;
 
 /**
@@ -597,13 +598,13 @@ class mxObjectCodec
      * node - XML node to be decoded.
      * into - Optional objec to encode the node into.
      *
-     * @param mixed      $dec
-     * @param mixed      $node
+     * @param mxCodec    $dec
+     * @param DOMElement $node
      * @param null|mixed $into
      *
      * @return mixed
      */
-    public function decode($dec, $node, &$into = null)
+    public function decode(mxCodec $dec, DOMElement $node, &$into = null)
     {
         $id = $node->getAttribute('id');
         $obj = null;

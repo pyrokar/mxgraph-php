@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace MxGraph;
 
+use Safe\Exceptions\ImageException;
+use Safe\Exceptions\StringsException;
+
 /**
  * Copyright (c) 2006-2013, Gaudenz Alder.
  */
@@ -49,7 +52,7 @@ class mxGdCanvas
      * Holds the color object for the shadow color defined in
      * <mxConstants.W3C_SHADOWCOLOR>.
      *
-     * @var false | int
+     * @var int
      */
     public $shadowColor;
 
@@ -75,7 +78,7 @@ class mxGdCanvas
      *
      * Holds the image.
      *
-     * @var false | resource
+     * @var resource
      */
     public $image;
 
@@ -101,6 +104,9 @@ class mxGdCanvas
      * @param float  $scale
      * @param string $background
      * @param string $imageBasePath
+     *
+     * @throws ImageException
+     * @throws StringsException
      */
     public function __construct(
         int $width = 0,
@@ -114,16 +120,16 @@ class mxGdCanvas
         $this->scale = $scale;
 
         if ($width > 0 && $height > 0) {
-            $this->image = @imagecreatetruecolor($width, $height);
+            $this->image = @\Safe\imagecreatetruecolor($width, $height);
 
             if ($this->antialias &&
                 function_exists('imageantialias')) {
-                imageantialias($this->image, true);
+                \Safe\imageantialias($this->image, true);
             }
 
             if (isset($background)) {
                 $color = $this->getColor($background);
-                imagefilledrectangle(
+                \Safe\imagefilledrectangle(
                     $this->image,
                     0,
                     0,
@@ -169,6 +175,9 @@ class mxGdCanvas
      * Draws the given cell state.
      *
      * @param mixed $state
+     *
+     * @throws ImageException
+     * @throws StringsException
      */
     public function drawCell($state): void
     {
@@ -185,7 +194,7 @@ class mxGdCanvas
 
             if (isset($this->image)) {
                 // KNOWN: Stroke widths are ignored by GD if antialias is on
-                imagesetthickness($this->image, (int) $strokeWidth);
+                \Safe\imagesetthickness($this->image, (int) $strokeWidth);
             }
 
             // Draws the start marker
@@ -270,7 +279,7 @@ class mxGdCanvas
             $this->drawLine($pt->x, $pt->y, $pe->x, $pe->y, $stroke, $dashed);
 
             if (isset($this->image)) {
-                imagesetthickness($this->image, 1);
+                \Safe\imagesetthickness($this->image, 1);
             }
         } else {
             $x = $state->x;
@@ -311,6 +320,9 @@ class mxGdCanvas
      * @param mixed $text
      * @param mixed $state
      * @param mixed $html
+     *
+     * @throws ImageException
+     * @throws StringsException
      */
     public function drawLabel($text, $state, $html = false): void
     {
@@ -336,6 +348,9 @@ class mxGdCanvas
      * @param mixed $pe
      * @param mixed $size
      * @param mixed $stroke
+     *
+     * @throws StringsException
+     * @throws ImageException
      *
      * @return null|mxPoint
      */
@@ -471,6 +486,9 @@ class mxGdCanvas
      * @param mixed      $y1
      * @param null|mixed $stroke
      * @param mixed      $dashed
+     *
+     * @throws ImageException
+     * @throws StringsException
      */
     public function drawLine($x0, $y0, $x1, $y1, $stroke = null, $dashed = false): void
     {
@@ -481,21 +499,21 @@ class mxGdCanvas
             // ImageSetStyle doesnt work with antialiasing.
             if ($this->antialias &&
                 function_exists('imageantialias')) {
-                imageantialias($this->image, false);
+                \Safe\imageantialias($this->image, false);
             }
 
             $st = [$stroke, $stroke, $stroke, $stroke,
                 IMG_COLOR_TRANSPARENT, IMG_COLOR_TRANSPARENT,
                 IMG_COLOR_TRANSPARENT, IMG_COLOR_TRANSPARENT, ];
-            imagesetstyle($this->image, $st);
-            imageline($this->image, $x0, $y0, $x1, $y1, IMG_COLOR_STYLED);
+            \Safe\imagesetstyle($this->image, $st);
+            \Safe\imageline($this->image, $x0, $y0, $x1, $y1, IMG_COLOR_STYLED);
 
             if ($this->antialias &&
                 function_exists('imageantialias')) {
-                imageantialias($this->image, true);
+                \Safe\imageantialias($this->image, true);
             }
         } else {
-            imageline($this->image, $x0, $y0, $x1, $y1, $stroke);
+            \Safe\imageline($this->image, $x0, $y0, $x1, $y1, $stroke);
         }
     }
 
@@ -509,6 +527,9 @@ class mxGdCanvas
      * @param mixed $w
      * @param mixed $h
      * @param mixed $style
+     *
+     * @throws ImageException
+     * @throws StringsException
      */
     public function drawShape($x, $y, $w, $h, $style): void
     {
@@ -537,7 +558,7 @@ class mxGdCanvas
             $strokeWidth = mxUtils::getValue($style, mxConstants::$STYLE_STROKEWIDTH, 1) * $this->scale;
 
             if (isset($this->image)) {
-                imagesetthickness($this->image, (int) $strokeWidth);
+                \Safe\imagesetthickness($this->image, (int) $strokeWidth);
             }
 
             if ($shape == mxConstants::$SHAPE_ELLIPSE) {
@@ -638,7 +659,7 @@ class mxGdCanvas
             }
 
             if (isset($this->image)) {
-                imagesetthickness($this->image, 1);
+                \Safe\imagesetthickness($this->image, 1);
             }
         }
     }
@@ -652,6 +673,9 @@ class mxGdCanvas
      * @param string     $fill
      * @param null|mixed $stroke
      * @param mixed      $shadow
+     *
+     * @throws ImageException
+     * @throws StringsException
      */
     public function drawPolygon($points, string $fill = null, $stroke = null, $shadow = false): void
     {
@@ -660,7 +684,7 @@ class mxGdCanvas
 
             if (isset($fill)) {
                 if ($shadow) {
-                    imagefilledpolygon(
+                    \Safe\imagefilledpolygon(
                         $this->image,
                         $this->offset($points),
                         $n,
@@ -669,12 +693,12 @@ class mxGdCanvas
                 }
 
                 $_fill = $this->getColor($fill);
-                imagefilledpolygon($this->image, $points, $n, $_fill);
+                \Safe\imagefilledpolygon($this->image, $points, $n, $_fill);
             }
 
             if (isset($stroke)) {
                 $stroke = $this->getColor($stroke);
-                imagepolygon($this->image, $points, $n, $stroke);
+                \Safe\imagepolygon($this->image, $points, $n, $stroke);
             }
         }
     }
@@ -693,6 +717,9 @@ class mxGdCanvas
      * @param mixed      $shadow
      * @param mixed      $rounded
      * @param mixed      $dashed
+     *
+     * @throws ImageException
+     * @throws StringsException
      */
     public function drawRect(
         $x,
@@ -708,7 +735,7 @@ class mxGdCanvas
         // TODO: Rounded rectangles
         if (isset($fill)) {
             if ($shadow) {
-                imagefilledrectangle(
+                \Safe\imagefilledrectangle(
                     $this->image,
                     $x + mxConstants::$SHADOW_OFFSETX,
                     $y + mxConstants::$SHADOW_OFFSETY,
@@ -719,7 +746,7 @@ class mxGdCanvas
             }
 
             $fill = $this->getColor($fill);
-            imagefilledrectangle($this->image, $x, $y, $x + $w, $y + $h, $fill);
+            \Safe\imagefilledrectangle($this->image, $x, $y, $x + $w, $y + $h, $fill);
         }
 
         if (isset($stroke)) {
@@ -730,7 +757,7 @@ class mxGdCanvas
                 $this->drawLine($x, $y + $h, $x, $y, $stroke, $dashed);
             } else {
                 $stroke = $this->getColor($stroke);
-                imagerectangle($this->image, $x, $y, $x + $w, $y + $h, $stroke);
+                \Safe\imagerectangle($this->image, $x, $y, $x + $w, $y + $h, $stroke);
             }
         }
     }
@@ -747,12 +774,15 @@ class mxGdCanvas
      * @param null|mixed $fill
      * @param null|mixed $stroke
      * @param mixed      $shadow
+     *
+     * @throws ImageException
+     * @throws StringsException
      */
     public function drawOval($x, $y, $w, $h, $fill = null, $stroke = null, $shadow = false): void
     {
         if (isset($fill)) {
             if ($shadow) {
-                imagefilledellipse(
+                \Safe\imagefilledellipse(
                     $this->image,
                     $x + $w / 2 + mxConstants::$SHADOW_OFFSETX,
                     $y + $h / 2 + mxConstants::$SHADOW_OFFSETY,
@@ -763,7 +793,7 @@ class mxGdCanvas
             }
 
             $fill = $this->getColor($fill);
-            imagefilledellipse(
+            \Safe\imagefilledellipse(
                 $this->image,
                 $x + $w / 2,
                 $y + $h / 2,
@@ -775,7 +805,7 @@ class mxGdCanvas
 
         if (isset($stroke)) {
             $stroke = $this->getColor($stroke);
-            imageellipse(
+            \Safe\imageellipse(
                 $this->image,
                 $x + $w / 2,
                 $y + $h / 2,
@@ -798,6 +828,9 @@ class mxGdCanvas
      * @param null|mixed $fill
      * @param null|mixed $stroke
      * @param mixed      $shadow
+     *
+     * @throws ImageException
+     * @throws StringsException
      */
     public function drawRhombus($x, $y, $w, $h, $fill = null, $stroke = null, $shadow = false): void
     {
@@ -823,6 +856,9 @@ class mxGdCanvas
      * @param null|mixed $stroke
      * @param mixed      $shadow
      * @param null|mixed $direction
+     *
+     * @throws ImageException
+     * @throws StringsException
      */
     public function drawTriangle(
         $x,
@@ -864,6 +900,9 @@ class mxGdCanvas
      * @param null|mixed $stroke
      * @param mixed      $shadow
      * @param null|mixed $direction
+     *
+     * @throws ImageException
+     * @throws StringsException
      */
     public function drawHexagon(
         $x,
@@ -901,6 +940,9 @@ class mxGdCanvas
      * @param null|mixed $fill
      * @param null|mixed $stroke
      * @param mixed      $shadow
+     *
+     * @throws ImageException
+     * @throws StringsException
      */
     public function drawCylinder($x, $y, $w, $h, $fill = null, $stroke = null, $shadow = false): void
     {
@@ -938,6 +980,9 @@ class mxGdCanvas
      * @param null|mixed $fill
      * @param null|mixed $stroke
      * @param mixed      $shadow
+     *
+     * @throws ImageException
+     * @throws StringsException
      */
     public function drawCloud($x, $y, $w, $h, $fill = null, $stroke = null, $shadow = false): void
     {
@@ -946,31 +991,31 @@ class mxGdCanvas
                 $dx = mxConstants::$SHADOW_OFFSETX;
                 $dy = mxConstants::$SHADOW_OFFSETY;
 
-                imagefilledellipse($this->image, (int) ($x + 0.2 * $w + $dx), (int) ($y + 0.42 * $h + $dy), (int) (0.3 * $w), (int) (0.29 * $h), $this->shadowColor);
-                imagefilledellipse($this->image, (int) ($x + 0.4 * $w + $dx), (int) ($y + 0.25 * $h + $dy), (int) (0.4 * $w), (int) (0.4 * $h), $this->shadowColor);
-                imagefilledellipse($this->image, (int) ($x + 0.75 * $w + $dx), (int) ($y + 0.35 * $h + $dy), (int) (0.5 * $w), (int) (0.4 * $h), $this->shadowColor);
-                imagefilledellipse($this->image, (int) ($x + 0.2 * $w + $dx), (int) ($y + 0.65 * $h + $dy), (int) (0.3 * $w), (int) (0.3 * $h), $this->shadowColor);
-                imagefilledellipse($this->image, (int) ($x + 0.55 * $w + $dx), (int) ($y + 0.62 * $h + $dy), (int) (0.6 * $w), (int) (0.6 * $h), $this->shadowColor);
-                imagefilledellipse($this->image, (int) ($x + 0.88 * $w + $dx), (int) ($y + 0.63 * $h + $dy), (int) (0.3 * $w), (int) (0.3 * $h), $this->shadowColor);
+                \Safe\imagefilledellipse($this->image, (int) ($x + 0.2 * $w + $dx), (int) ($y + 0.42 * $h + $dy), (int) (0.3 * $w), (int) (0.29 * $h), $this->shadowColor);
+                \Safe\imagefilledellipse($this->image, (int) ($x + 0.4 * $w + $dx), (int) ($y + 0.25 * $h + $dy), (int) (0.4 * $w), (int) (0.4 * $h), $this->shadowColor);
+                \Safe\imagefilledellipse($this->image, (int) ($x + 0.75 * $w + $dx), (int) ($y + 0.35 * $h + $dy), (int) (0.5 * $w), (int) (0.4 * $h), $this->shadowColor);
+                \Safe\imagefilledellipse($this->image, (int) ($x + 0.2 * $w + $dx), (int) ($y + 0.65 * $h + $dy), (int) (0.3 * $w), (int) (0.3 * $h), $this->shadowColor);
+                \Safe\imagefilledellipse($this->image, (int) ($x + 0.55 * $w + $dx), (int) ($y + 0.62 * $h + $dy), (int) (0.6 * $w), (int) (0.6 * $h), $this->shadowColor);
+                \Safe\imagefilledellipse($this->image, (int) ($x + 0.88 * $w + $dx), (int) ($y + 0.63 * $h + $dy), (int) (0.3 * $w), (int) (0.3 * $h), $this->shadowColor);
             }
 
             $fill = $this->getColor($fill);
-            imagefilledellipse($this->image, (int) ($x + 0.2 * $w), (int) ($y + 0.42 * $h), (int) (.3 * $w), (int) (0.29 * $h), $fill);
-            imagefilledellipse($this->image, (int) ($x + 0.4 * $w), (int) ($y + 0.25 * $h), (int) (0.4 * $w), (int) (0.4 * $h), $fill);
-            imagefilledellipse($this->image, (int) ($x + 0.75 * $w), (int) ($y + 0.35 * $h), (int) (0.5 * $w), (int) (0.4 * $h), $fill);
-            imagefilledellipse($this->image, (int) ($x + 0.2 * $w), (int) ($y + 0.65 * $h), (int) (0.3 * $w), (int) (0.3 * $h), $fill);
-            imagefilledellipse($this->image, (int) ($x + 0.55 * $w), (int) ($y + 0.62 * $h), (int) (0.6 * $w), (int) (0.6 * $h), $fill);
-            imagefilledellipse($this->image, (int) ($x + 0.88 * $w), (int) ($y + 0.63 * $h), (int) (0.3 * $w), (int) (0.3 * $h), $fill);
+            \Safe\imagefilledellipse($this->image, (int) ($x + 0.2 * $w), (int) ($y + 0.42 * $h), (int) (.3 * $w), (int) (0.29 * $h), $fill);
+            \Safe\imagefilledellipse($this->image, (int) ($x + 0.4 * $w), (int) ($y + 0.25 * $h), (int) (0.4 * $w), (int) (0.4 * $h), $fill);
+            \Safe\imagefilledellipse($this->image, (int) ($x + 0.75 * $w), (int) ($y + 0.35 * $h), (int) (0.5 * $w), (int) (0.4 * $h), $fill);
+            \Safe\imagefilledellipse($this->image, (int) ($x + 0.2 * $w), (int) ($y + 0.65 * $h), (int) (0.3 * $w), (int) (0.3 * $h), $fill);
+            \Safe\imagefilledellipse($this->image, (int) ($x + 0.55 * $w), (int) ($y + 0.62 * $h), (int) (0.6 * $w), (int) (0.6 * $h), $fill);
+            \Safe\imagefilledellipse($this->image, (int) ($x + 0.88 * $w), (int) ($y + 0.63 * $h), (int) (0.3 * $w), (int) (0.3 * $h), $fill);
         }
 
         if (isset($stroke)) {
             $stroke = $this->getColor($stroke);
-            imagearc($this->image, (int) ($x + 0.2 * $w), (int) ($y + 0.42 * $h), (int) (0.3 * $w), (int) (0.29 * $h), 125, 270, $stroke);
-            imagearc($this->image, (int) ($x + 0.4 * $w), (int) ($y + 0.25 * $h), (int) (0.4 * $w), (int) (0.4 * $h), 170, 345, $stroke);
-            imagearc($this->image, (int) ($x + 0.75 * $w), (int) ($y + 0.35 * $h), (int) (0.5 * $w), (int) (0.4 * $h), 230, 55, $stroke);
-            imagearc($this->image, (int) ($x + 0.2 * $w), (int) ($y + 0.65 * $h), (int) (0.3 * $w), (int) (0.3 * $h), 50, 235, $stroke);
-            imagearc($this->image, (int) ($x + 0.55 * $w), (int) ($y + 0.62 * $h), (int) (0.6 * $w), (int) (0.6 * $h), 33, 145, $stroke);
-            imagearc($this->image, (int) ($x + 0.88 * $w), (int) ($y + 0.63 * $h), (int) (0.3 * $w), (int) (0.3 * $h), 290, 120, $stroke);
+            \Safe\imagearc($this->image, (int) ($x + 0.2 * $w), (int) ($y + 0.42 * $h), (int) (0.3 * $w), (int) (0.29 * $h), 125, 270, $stroke);
+            \Safe\imagearc($this->image, (int) ($x + 0.4 * $w), (int) ($y + 0.25 * $h), (int) (0.4 * $w), (int) (0.4 * $h), 170, 345, $stroke);
+            \Safe\imagearc($this->image, (int) ($x + 0.75 * $w), (int) ($y + 0.35 * $h), (int) (0.5 * $w), (int) (0.4 * $h), 230, 55, $stroke);
+            \Safe\imagearc($this->image, (int) ($x + 0.2 * $w), (int) ($y + 0.65 * $h), (int) (0.3 * $w), (int) (0.3 * $h), 50, 235, $stroke);
+            \Safe\imagearc($this->image, (int) ($x + 0.55 * $w), (int) ($y + 0.62 * $h), (int) (0.6 * $w), (int) (0.6 * $h), 33, 145, $stroke);
+            \Safe\imagearc($this->image, (int) ($x + 0.88 * $w), (int) ($y + 0.63 * $h), (int) (0.3 * $w), (int) (0.3 * $h), 290, 120, $stroke);
         }
     }
 
@@ -986,6 +1031,9 @@ class mxGdCanvas
      * @param null|mixed $fill
      * @param null|mixed $stroke
      * @param mixed      $shadow
+     *
+     * @throws ImageException
+     * @throws StringsException
      */
     public function drawActor($x, $y, $w, $h, $fill = null, $stroke = null, $shadow = false): void
     {
@@ -994,30 +1042,30 @@ class mxGdCanvas
                 $dx = mxConstants::$SHADOW_OFFSETX;
                 $dy = mxConstants::$SHADOW_OFFSETY;
 
-                imagefilledellipse($this->image, (int) ($x + 0.5 * $w + $dx), (int) ($y + 0.2 * $h + $dy), (int) (0.4 * $w), (int) (0.4 * $h), $this->shadowColor);
-                imagefilledellipse($this->image, (int) ($x + 0.2 * $w + $dx), (int) ($y + 0.6 * $h + $dy), (int) (0.4 * $w), (int) (0.4 * $h), $this->shadowColor);
-                imagefilledellipse($this->image, (int) ($x + 0.8 * $w + $dx), (int) ($y + 0.6 * $h + $dy), (int) (0.4 * $w), (int) (0.4 * $h), $this->shadowColor);
-                imagefilledrectangle($this->image, (int) ($x + 0.2 * $w + $dx), (int) ($y + 0.4 * $h + $dy), (int) ($x + 0.8 * $w + $dx), (int) ($y + 0.6 * $h + $dy), $this->shadowColor);
-                imagefilledrectangle($this->image, (int) ($x + $dx), (int) ($y + 0.6 * $h + $dy), (int) ($x + $w + $dx), (int) ($y + $h + $dy), $this->shadowColor);
+                \Safe\imagefilledellipse($this->image, (int) ($x + 0.5 * $w + $dx), (int) ($y + 0.2 * $h + $dy), (int) (0.4 * $w), (int) (0.4 * $h), $this->shadowColor);
+                \Safe\imagefilledellipse($this->image, (int) ($x + 0.2 * $w + $dx), (int) ($y + 0.6 * $h + $dy), (int) (0.4 * $w), (int) (0.4 * $h), $this->shadowColor);
+                \Safe\imagefilledellipse($this->image, (int) ($x + 0.8 * $w + $dx), (int) ($y + 0.6 * $h + $dy), (int) (0.4 * $w), (int) (0.4 * $h), $this->shadowColor);
+                \Safe\imagefilledrectangle($this->image, (int) ($x + 0.2 * $w + $dx), (int) ($y + 0.4 * $h + $dy), (int) ($x + 0.8 * $w + $dx), (int) ($y + 0.6 * $h + $dy), $this->shadowColor);
+                \Safe\imagefilledrectangle($this->image, (int) ($x + $dx), (int) ($y + 0.6 * $h + $dy), (int) ($x + $w + $dx), (int) ($y + $h + $dy), $this->shadowColor);
             }
 
             $fill = $this->getColor($fill);
-            imagefilledellipse($this->image, (int) ($x + 0.5 * $w), (int) ($y + 0.2 * $h), (int) (0.4 * $w), (int) (0.4 * $h), $fill);
-            imagefilledellipse($this->image, (int) ($x + 0.2 * $w), (int) ($y + 0.6 * $h), (int) (0.4 * $w), (int) (0.4 * $h), $fill);
-            imagefilledellipse($this->image, (int) ($x + 0.8 * $w), (int) ($y + 0.6 * $h), (int) (0.4 * $w), (int) (0.4 * $h), $fill);
-            imagefilledrectangle($this->image, (int) ($x + 0.2 * $w), (int) ($y + 0.4 * $h), (int) ($x + 0.8 * $w), (int) ($y + 0.6 * $h), $fill);
-            imagefilledrectangle($this->image, (int) ($x), (int) ($y + 0.6 * $h), (int) ($x + $w), (int) ($y + $h), $fill);
+            \Safe\imagefilledellipse($this->image, (int) ($x + 0.5 * $w), (int) ($y + 0.2 * $h), (int) (0.4 * $w), (int) (0.4 * $h), $fill);
+            \Safe\imagefilledellipse($this->image, (int) ($x + 0.2 * $w), (int) ($y + 0.6 * $h), (int) (0.4 * $w), (int) (0.4 * $h), $fill);
+            \Safe\imagefilledellipse($this->image, (int) ($x + 0.8 * $w), (int) ($y + 0.6 * $h), (int) (0.4 * $w), (int) (0.4 * $h), $fill);
+            \Safe\imagefilledrectangle($this->image, (int) ($x + 0.2 * $w), (int) ($y + 0.4 * $h), (int) ($x + 0.8 * $w), (int) ($y + 0.6 * $h), $fill);
+            \Safe\imagefilledrectangle($this->image, (int) ($x), (int) ($y + 0.6 * $h), (int) ($x + $w), (int) ($y + $h), $fill);
         }
 
         if (null != $stroke) {
             $stroke = $this->getColor($stroke);
-            imageellipse($this->image, (int) ($x + 0.5 * $w), (int) ($y + 0.2 * $h), (int) (0.4 * $w), (int) (0.4 * $h), $stroke);
-            imageline($this->image, (int) ($x + 0.2 * $w), (int) ($y + 0.4 * $h), (int) ($x + 0.8 * $w), (int) ($y + 0.4 * $h), $stroke);
-            imagearc($this->image, (int) ($x + 0.2 * $w), (int) ($y + 0.6 * $h), (int) (0.4 * $w), (int) (0.4 * $h), 180, 270, $stroke);
-            imagearc($this->image, (int) ($x + 0.8 * $w), (int) ($y + 0.6 * $h), (int) (0.4 * $w), (int) (0.4 * $h), 270, 360, $stroke);
-            imageline($this->image, (int) ($x), (int) ($y + 0.6 * $h), (int) ($x), (int) ($y + $h), $stroke);
-            imageline($this->image, (int) ($x), (int) ($y + $h), (int) ($x + $w), (int) ($y + $h), $stroke);
-            imageline($this->image, (int) ($x + $w), (int) ($y + $h), (int) ($x + $w), (int) ($y + 0.6 * $h), $stroke);
+            \Safe\imageellipse($this->image, (int) ($x + 0.5 * $w), (int) ($y + 0.2 * $h), (int) (0.4 * $w), (int) (0.4 * $h), $stroke);
+            \Safe\imageline($this->image, (int) ($x + 0.2 * $w), (int) ($y + 0.4 * $h), (int) ($x + 0.8 * $w), (int) ($y + 0.4 * $h), $stroke);
+            \Safe\imagearc($this->image, (int) ($x + 0.2 * $w), (int) ($y + 0.6 * $h), (int) (0.4 * $w), (int) (0.4 * $h), 180, 270, $stroke);
+            \Safe\imagearc($this->image, (int) ($x + 0.8 * $w), (int) ($y + 0.6 * $h), (int) (0.4 * $w), (int) (0.4 * $h), 270, 360, $stroke);
+            \Safe\imageline($this->image, (int) ($x), (int) ($y + 0.6 * $h), (int) ($x), (int) ($y + $h), $stroke);
+            \Safe\imageline($this->image, (int) ($x), (int) ($y + $h), (int) ($x + $w), (int) ($y + $h), $stroke);
+            \Safe\imageline($this->image, (int) ($x + $w), (int) ($y + $h), (int) ($x + $w), (int) ($y + 0.6 * $h), $stroke);
         }
     }
 
@@ -1034,14 +1082,16 @@ class mxGdCanvas
      * @param mixed $aspect
      * @param mixed $flipH
      * @param mixed $flipV
+     *
+     *@throws ImageException
      */
     public function drawImage($x, $y, $w, $h, $image, $aspect = true, $flipH = false, $flipV = false): void
     {
         $img = $this->loadImage($image);
 
         if (null != $img) {
-            $iw = imagesx($img);
-            $ih = imagesy($img);
+            $iw = \Safe\imagesx($img);
+            $ih = \Safe\imagesy($img);
 
             // Horizontal and vertical image flipping
             if ($flipH || $flipV) {
@@ -1054,7 +1104,7 @@ class mxGdCanvas
                 $x0 = ($w - $iw * $s) / 2;
                 $y0 = ($h - $ih * $s) / 2;
 
-                imagecopyresized(
+                \Safe\imagecopyresized(
                     $this->image,
                     $img,
                     $x0 + $x,
@@ -1067,7 +1117,7 @@ class mxGdCanvas
                     $ih
                 );
             } else {
-                imagecopyresized(
+                \Safe\imagecopyresized(
                     $this->image,
                     $img,
                     $x,
@@ -1092,6 +1142,9 @@ class mxGdCanvas
      * @param int                   $w
      * @param int                   $h
      * @param array<string, string> $style
+     *
+     * @throws ImageException
+     * @throws StringsException
      */
     public function drawText(string $string, int $x, int $y, int $w, int $h, array $style): void
     {
@@ -1164,6 +1217,9 @@ class mxGdCanvas
      * @param mixed $w
      * @param mixed $h
      * @param mixed $style
+     *
+     * @throws ImageException
+     * @throws StringsException
      */
     public function drawTtfText($string, $x, $y, $w, $h, $style): void
     {
@@ -1210,7 +1266,7 @@ class mxGdCanvas
             for ($i = 0; $i < $lineCount; ++$i) {
                 $left = $x;
                 $top = $y;
-                $tmp = imagettfbbox($fontSize, 0, $font, $lines[$i]);
+                $tmp = \Safe\imagettfbbox($fontSize, 0, $font, $lines[$i]);
                 $lineWidth = $tmp[2] - $tmp[0];
 
                 if ($align == mxConstants::$ALIGN_CENTER) {
@@ -1263,10 +1319,12 @@ class mxGdCanvas
      * @param mixed $fontSize
      * @param mixed $font
      * @param mixed $rot
+     *
+     * @throws ImageException
      */
     public function drawTtfTextLine($line, $x, $y, $w, $h, $color, $fontSize, $font, $rot): void
     {
-        imagettftext($this->image, $fontSize, $rot, $x, $y, $color, $font, $line);
+        \Safe\imagettftext($this->image, $fontSize, $rot, $x, $y, $color, $font, $line);
     }
 
     /**
@@ -1294,6 +1352,9 @@ class mxGdCanvas
      * @param mixed $w
      * @param mixed $h
      * @param mixed $style
+     *
+     * @throws ImageException
+     * @throws StringsException
      */
     public function drawFixedText($string, $x, $y, $w, $h, $style): void
     {
@@ -1395,11 +1456,13 @@ class mxGdCanvas
      * @param mixed $top
      * @param mixed $color
      * @param mixed $horizontal
+     *
+     * @throws ImageException
      */
     public function drawFixedTextLine($text, $font, $left, $top, $color, $horizontal = true): void
     {
         if ($horizontal) {
-            imagestring(
+            \Safe\imagestring(
                 $this->image,
                 $font,
                 $left,
@@ -1408,7 +1471,7 @@ class mxGdCanvas
                 $color
             );
         } else {
-            imagestringup(
+            \Safe\imagestringup(
                 $this->image,
                 $font,
                 $left,
@@ -1429,9 +1492,12 @@ class mxGdCanvas
      * @param string $hex
      * @param string $default
      *
-     * @return false|int
+     * @throws ImageException
+     * @throws StringsException
+     *
+     * @return int
      */
-    public function getColor(string $hex, string $default = null)
+    public function getColor(string $hex, string $default = null): int
     {
         if (!$hex) {
             $hex = $default;
@@ -1463,13 +1529,17 @@ class mxGdCanvas
         } elseif ('none' === $hex) {
             $result = null;
         } else {
-            $rgb = array_map('hexdec', explode('|', wordwrap(substr($hex, 1), 2, '|', true)));
+            $rgb = array_map('hexdec', explode('|', wordwrap(\Safe\substr($hex, 1), 2, '|', true)));
 
             if (count($rgb) > 2) {
-                $result = imagecolorallocate($this->image, $rgb[0], $rgb[1], $rgb[2]);
+                $result = imagecolorallocate($this->image, (int) $rgb[0], (int) $rgb[1], (int) $rgb[2]);
             } else {
                 $result = imagecolorallocate($this->image, 0, 0, 0);
             }
+        }
+
+        if (!is_numeric($result)) {
+            throw ImageException::createFromPhpError();
         }
 
         return $result;
@@ -1509,7 +1579,7 @@ class mxGdCanvas
      */
     public function destroy(): void
     {
-        imagedestroy($this->image);
+        \Safe\imagedestroy($this->image);
     }
 
     /**
@@ -1520,6 +1590,9 @@ class mxGdCanvas
      * @param mxGraph     $graph
      * @param mxRectangle $clip
      * @param null|mixed  $bg
+     *
+     * @throws StringsException
+     * @throws ImageException
      *
      * @return false|resource
      */

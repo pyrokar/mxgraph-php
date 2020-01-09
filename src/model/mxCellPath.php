@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace MxGraph;
 
+use Safe\Exceptions\StringsException;
+
 /**
  * Copyright (c) 2006-2013, Gaudenz Alder.
  */
@@ -35,6 +37,8 @@ class mxCellPath
      *
      * @param mxCell $cell
      *
+     * @throws StringsException
+     *
      * @return string
      */
     public static function create(mxCell $cell): string
@@ -50,7 +54,7 @@ class mxCellPath
             $parent = $cell->getParent();
         }
 
-        return (strlen($result) > 1) ? substr($result, 0, -1) : '';
+        return (strlen($result) > 1) ? \Safe\substr($result, 0, -1) : '';
     }
 
     /**
@@ -65,7 +69,9 @@ class mxCellPath
      *
      * @param string $path
      *
-     * @return null|false|string
+     * @throws StringsException
+     *
+     * @return string
      */
     public static function getParentPath(string $path = '')
     {
@@ -76,10 +82,10 @@ class mxCellPath
                 return '';
             }
 
-            return substr($path, 0, $index);
+            return \Safe\substr($path, 0, $index);
         }
 
-        return null;
+        return '';
     }
 
     /**
@@ -102,6 +108,10 @@ class mxCellPath
     {
         $parent = $root;
         $tokens = explode(self::$PATH_SEPARATOR, $path);
+
+        if (false === $tokens) {
+            return $parent;
+        }
 
         foreach ($tokens as $i => $iValue) {
             $parent = $parent->getChildAt($tokens[$i]);

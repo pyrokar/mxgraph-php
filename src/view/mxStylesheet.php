@@ -47,7 +47,7 @@ class mxStylesheet
      *
      * Creates and returns the default vertex style.
      *
-     * @return array<string, string>
+     * @return array<string, mixed>
      */
     public function createDefaultVertexStyle(): array
     {
@@ -219,8 +219,8 @@ class mxStylesheet
             $pos = strpos($iValue, '=');
 
             if (false !== $pos) {
-                $key = substr($tmp, 0, $pos);
-                $value = substr($tmp, $pos + 1);
+                $key = \Safe\substr($tmp, 0, $pos);
+                $value = \Safe\substr($tmp, $pos + 1);
 
                 if ($value === mxConstants::$NONE) {
                     unset($style[$key]);

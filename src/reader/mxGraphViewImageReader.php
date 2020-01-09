@@ -4,6 +4,10 @@ declare(strict_types=1);
 
 namespace MxGraph;
 
+use Safe\Exceptions\FilesystemException;
+use Safe\Exceptions\StringsException;
+use Safe\Exceptions\XmlException;
+
 /**
  * Copyright (c) 2006-2013, Gaudenz Alder.
  */
@@ -76,13 +80,15 @@ class mxGraphViewImageReader
      *
      * @param string $background
      * @param int    $border
+     *
+     * @throws XmlException
      */
     public function __construct(string $background = null, int $border = 0)
     {
-        $this->parser = xml_parser_create();
+        $this->parser = \Safe\xml_parser_create();
 
         xml_parser_set_option($this->parser, XML_OPTION_CASE_FOLDING, 0);
-        xml_set_object($this->parser, $this);
+        // \Safe\xml_set_object($this->parser, $this);
         xml_set_element_handler($this->parser, [$this, 'startElement'], [$this, 'endElement']);
 
         $this->background = $background;
@@ -124,21 +130,24 @@ class mxGraphViewImageReader
      * Reads the specified view XML file in blocks of 4096 bytes.
      *
      * @param mixed $filename
+     *
+     * @throws FilesystemException
+     * @throws StringsException
      */
     public function readFile($filename): void
     {
-        $fp = fopen($filename, 'rb');
+        $fp = \Safe\fopen($filename, 'rb');
 
-        while ($data = fread($fp, 4096)) {
+        while ($data = \Safe\fread($fp, 4096)) {
             xml_parse($this->parser, $data, feof($fp)) or
-            die(sprintf(
+            die(\Safe\sprintf(
                 'XML Error: %s at line %d',
                 xml_error_string(xml_get_error_code($this->parser)),
                 xml_get_current_line_number($this->parser)
             ));
         }
 
-        fclose($fp);
+        \Safe\fclose($fp);
     }
 
     /**
@@ -302,6 +311,8 @@ class mxGraphViewImageReader
      * @param string $string
      * @param string $background
      *
+     * @throws XmlException
+     *
      * @return false | resource
      */
     public static function convert(string $string, string $background = null)
@@ -319,6 +330,10 @@ class mxGraphViewImageReader
      *
      * @param string $filename
      * @param string $background
+     *
+     * @throws StringsException
+     * @throws XmlException
+     * @throws FilesystemException
      *
      * @return false | resource
      */

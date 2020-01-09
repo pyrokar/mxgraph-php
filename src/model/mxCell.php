@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace MxGraph;
 
+use DOMElement;
+use Exception;
+
 /**
  * Copyright (c) 2006-2013, Gaudenz Alder.
  */
@@ -167,10 +170,17 @@ class mxCell
      * Function: getId.
      *
      * Returns the Id of the cell as a string.
+     *
+     * @throws Exception
      */
-    public function getId(): ?int
+    public function getId(): int
     {
         return $this->id;
+    }
+
+    public function hasId(): bool
+    {
+        return null !== $this->id;
     }
 
     /**
@@ -728,21 +738,19 @@ class mxCell
      * Returns the specified attribute from the user object if it is an XML
      * node.
      *
-     * @param mixed      $key
-     * @param null|mixed $defaultValue
+     * @param string $key
+     * @param string $defaultValue
      *
-     * @return null|mixed
+     * @return string
      */
-    public function getAttribute($key, $defaultValue = null)
+    public function getAttribute($key, $defaultValue = null): string
     {
         $userObject = $this->getValue();
 
-        $value = (is_object($userObject) &&
-            XML_ELEMENT_NODE == $userObject->nodeType) ?
-            $userObject->getAttribute($key) : null;
+        $value = $defaultValue;
 
-        if (!isset($value)) {
-            $value = $defaultValue;
+        if ($userObject instanceof DOMElement && $userObject->hasAttribute(($key))) {
+            $value = $userObject->getAttribute($key);
         }
 
         return $value;
@@ -753,15 +761,14 @@ class mxCell
      *
      * Sets the specified attribute on the user object if it is an XML node.
      *
-     * @param mixed $key
-     * @param mixed $value
+     * @param string $key
+     * @param string $value
      */
     public function setAttribute($key, $value): void
     {
         $userObject = $this->getValue();
 
-        if (is_object($userObject) &&
-            XML_ELEMENT_NODE === $userObject->nodeType) {
+        if ($userObject instanceof DOMElement) {
             $userObject->setAttribute($key, $value);
         }
     }

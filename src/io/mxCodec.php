@@ -8,6 +8,8 @@ use DOMDocument;
 use DOMElement;
 use DOMNode;
 use Exception;
+use Safe\Exceptions\ErrorfuncException;
+use Safe\Exceptions\StringsException;
 
 /**
  * Copyright (c) 2006-2013, Gaudenz Alder.
@@ -208,6 +210,9 @@ class mxCodec
      *
      * @param mixed $obj
      *
+     * @throws Exception
+     * @throws StringsException
+     *
      * @return string | null
      */
     public function getId($obj): ?string
@@ -218,9 +223,9 @@ class mxCodec
             $id = $this->reference($obj);
 
             if (!$id && $obj instanceof mxCell) {
-                $id = $obj->getId();
-
-                if (!isset($id)) {
+                if ($obj->hasId()) {
+                    $id = (string) $obj->getId();
+                } else {
                     // Uses an on-the-fly Id
                     $id = mxCellPath::create($obj);
 
@@ -266,6 +271,8 @@ class mxCodec
      *
      * @param mixed $obj
      *
+     * @throws ErrorfuncException
+     *
      * @return null|mixed
      */
     public function encode($obj)
@@ -283,13 +290,10 @@ class mxCodec
 
             if (isset($enc)) {
                 $node = $enc->encode($this, $obj);
+            } elseif ($obj instanceof \DOMElement) {
+                $node = $obj->cloneNode(true);
             } else {
-                if ('DOMElement' == get_class($obj)) {
-                    $node = $obj->cloneNode(true);
-                } else {
-                    mxLog::warn('mxCodec.encode: No codec for '.
-                        mxCodecRegistry::getName($obj));
-                }
+                mxLog::warn('mxCodec.encode: No codec for '.mxCodecRegistry::getName($obj));
             }
         }
 
@@ -367,6 +371,8 @@ class mxCodec
      * @param mixed $cell
      * @param mixed $node
      * @param mixed $includeChildren
+     *
+     * @throws ErrorfuncException
      */
     public function encodeCell($cell, $node, $includeChildren = true): void
     {
@@ -486,11 +492,13 @@ class mxCodec
      * @param mixed $node
      * @param mixed $attribute
      * @param mixed $value
+     *
+     * @throws ErrorfuncException
      */
     public function setAttribute($node, $attribute, $value): void
     {
         if (is_array($value)) {
-            error_log("cannot write array {$attribute}");
+            \Safe\error_log("cannot write array {$attribute}");
         } elseif (isset($attribute, $value)) {
             $node->setAttribute($attribute, $value);
         }

@@ -5,7 +5,10 @@ declare(strict_types=1);
 namespace MxGraph;
 
 use DOMDocument;
+use DOMElement;
 use Exception;
+use Safe\Exceptions\ImageException;
+use function Safe\imagesx;
 
 /**
  * Copyright (c) 2006-2013, Gaudenz Alder.
@@ -21,12 +24,12 @@ class mxUtils
      *
      * Returns the size of the given label.
      *
-     * @param mixed $label
-     * @param mixed $style
+     * @param string               $label
+     * @param array<string, mixed> $style
      *
      * @return mxRectangle
      */
-    public static function getLabelSize($label, $style): mxRectangle
+    public static function getLabelSize(string $label, array $style): mxRectangle
     {
         $fontSize = self::getValue(
             $style,
@@ -47,22 +50,22 @@ class mxUtils
      *
      * Returns the paint bounds for the given label.
      *
-     * @param mixed $label
-     * @param mixed $style
-     * @param mixed $isHtml
-     * @param mixed $offset
-     * @param mixed $vertexBounds
-     * @param mixed $scale
+     * @param string               $label
+     * @param array<string, mixed> $style
+     * @param bool                 $isHtml
+     * @param mxPoint              $offset
+     * @param mxRectangle          $vertexBounds
+     * @param float                $scale
      *
      * @return mxRectangle
      */
     public static function getLabelPaintBounds(
-        $label,
-        $style,
-        $isHtml,
-        $offset,
-        $vertexBounds,
-        $scale
+        string $label,
+        array $style,
+        bool $isHtml,
+        mxPoint $offset,
+        ?mxRectangle $vertexBounds,
+        float $scale
     ): mxRectangle {
         $size = self::getLabelSize($label, $style);
 
@@ -71,12 +74,11 @@ class mxUtils
         $width = 0;
         $height = 0;
 
-        if (isset($vertexBounds)) {
+        if ($vertexBounds) {
             $x += $vertexBounds->x;
             $y += $vertexBounds->y;
 
-            if (self::getValue($style, mxConstants::$STYLE_SHAPE, '') ==
-                mxConstants::$SHAPE_SWIMLANE) {
+            if (self::getValue($style, mxConstants::$STYLE_SHAPE, '') === mxConstants::$SHAPE_SWIMLANE) {
                 // Limits the label to the swimlane title
                 $start = self::getNumber(
                     $style,
@@ -117,7 +119,7 @@ class mxUtils
      * (For edge labels this width and height is 0.) The scale is used to scale
      * the given size and the spacings in the specified style.
      *
-     * @param mixed $x
+     * @param float $x
      * @param mixed $y
      * @param mixed $size
      * @param mixed $outerWidth
@@ -127,7 +129,7 @@ class mxUtils
      *
      * @return mxRectangle
      */
-    public static function getScaledLabelBounds($x, $y, $size, $outerWidth, $outerHeight, $style, $scale): mxRectangle
+    public static function getScaledLabelBounds(float $x, $y, $size, $outerWidth, $outerHeight, $style, $scale): mxRectangle
     {
         // Adds an inset of 3 pixels
         $inset = mxConstants::$LABEL_INSET * $scale;
@@ -174,11 +176,11 @@ class mxUtils
         }
 
         // Computes the position of the label for the horizontal alignment
-        if (($horizontal && $align == mxConstants::$ALIGN_CENTER) ||
-            (!$horizontal && $valign == mxConstants::$ALIGN_MIDDLE)) {
+        if (($horizontal && $align === mxConstants::$ALIGN_CENTER) ||
+            (!$horizontal && $valign === mxConstants::$ALIGN_MIDDLE)) {
             $x += ($outerWidth - $width) / 2 + $left - $right;
-        } elseif (($horizontal && $align == mxConstants::$ALIGN_RIGHT) ||
-            (!$horizontal && $valign == mxConstants::$ALIGN_BOTTOM)) {
+        } elseif (($horizontal && $align === mxConstants::$ALIGN_RIGHT) ||
+            (!$horizontal && $valign === mxConstants::$ALIGN_BOTTOM)) {
             $x += $outerWidth - $width - $spacing - $right;
         } else {
             $x += $spacing + $left;
@@ -217,6 +219,8 @@ class mxUtils
      * @param mixed      $fontSize
      * @param null|mixed $fontFamily
      *
+     * @throws ImageException
+     *
      * @return mxRectangle
      */
     public static function getSizeForString($text, $fontSize = 0, $fontFamily = null): mxRectangle
@@ -235,7 +239,7 @@ class mxUtils
 
             if (mxConstants::$TTF_ENABLED &&
                 function_exists('imagettfbbox')) {
-                $bbox = imagettfbbox($fontSize * mxConstants::$TTF_SIZEFACTOR, 0, $fontFamily, $text);
+                $bbox = \Safe\imagettfbbox($fontSize * mxConstants::$TTF_SIZEFACTOR, 0, $fontFamily, $text);
                 $textWidth = $bbox[2] - $bbox[0];
                 $textHeight = ($fontSize + mxConstants::$DEFAULT_LINESPACING) * $lineCount;
 
@@ -269,12 +273,14 @@ class mxUtils
      * @param mixed $flipH
      * @param mixed $flipV
      *
+     * @throws ImageException
+     *
      * @return false|mixed|resource
      */
     public static function flipImage($img, $flipH, $flipV)
     {
         $w = imagesx($img);
-        $h = imagesy($img);
+        $h = \Safe\imagesy($img);
 
         $sx = 0;
         $sy = 0;
@@ -291,17 +297,19 @@ class mxUtils
             $sh = -$h;
         }
 
-        $dst = imagecreatetruecolor($w, $h);
+        $dst = \Safe\imagecreatetruecolor($w, $h);
 
         // Fills the background with transparent white
         $bg = imagecolorallocatealpha($dst, 255, 255, 255, 127);
-        imagefill($dst, 0, 0, $bg);
+        \Safe\imagefill($dst, 0, 0, $bg);
 
-        if (imagecopyresampled($dst, $img, 0, 0, $sx, $sy, $w, $h, $sw, $sh)) {
+        try {
+            \Safe\imagecopyresampled($dst, $img, 0, 0, $sx, $sy, $w, $h, $sw, $sh);
+
             return $dst;
+        } catch (ImageException $exception) {
+            return $img;
         }
-
-        return $img;
     }
 
     /**
@@ -497,21 +505,22 @@ class mxUtils
      * image - GD image to be encoded.
      * format - String that defines the encoding format. Default is png.
      *
-     * @param mixed      $image
-     * @param null|mixed $format
+     * @param resource $image
+     * @param string   $format
      *
-     * @return bool
+     * @throws ImageException
+     *
+     * @return void
      */
-    public static function encodeImage($image, $format = null): bool
+    public static function encodeImage($image, $format = null): void
     {
-        if ('gif' == $format) {
-            return imagegif($image);
+        if ('gif' === $format) {
+            \Safe\imagegif($image);
+        } elseif ('jpg' === $format) {
+            \Safe\imagejpeg($image);
+        } else {
+            \Safe\imagepng($image);
         }
-        if ('jpg' == $format) {
-            return imagejpeg($image);
-        }
-
-        return imagepng($image);
     }
 
     /**
@@ -637,6 +646,8 @@ class mxUtils
      * @param mixed $style
      * @param mixed $stylename
      *
+     * @throws \Safe\Exceptions\StringsException
+     *
      * @return false|string
      */
     public static function removeStylename($style, $stylename)
@@ -656,7 +667,7 @@ class mxUtils
 
         $len = strlen($result);
 
-        return ($len > 1) ? substr($result, 0, $len - 1) : $result;
+        return ($len > 1) ? \Safe\substr($result, 0, $len - 1) : $result;
     }
 
     /**
@@ -666,6 +677,8 @@ class mxUtils
      * style.
      *
      * @param mixed $style
+     *
+     * @throws \Safe\Exceptions\StringsException
      *
      * @return false|string
      */
@@ -686,7 +699,7 @@ class mxUtils
 
         $len = strlen($result);
 
-        return ($len > 1) ? substr($result, 0, $len - 1) : $result;
+        return ($len > 1) ? \Safe\substr($result, 0, $len - 1) : $result;
     }
 
     /**
@@ -749,6 +762,8 @@ class mxUtils
      * @param mixed $key
      * @param mixed $value
      *
+     * @throws \Safe\Exceptions\StringsException
+     *
      * @return mixed|string
      */
     public static function setStyle($style, $key, $value)
@@ -765,7 +780,7 @@ class mxUtils
 
             if (false === $index) {
                 if ($isValue) {
-                    $sep = (';' == $style[strlen($style) - 1]) ? '' : ';';
+                    $sep = (';' === $style[strlen($style) - 1]) ? '' : ';';
                     $style = "{$style}$sep{$key}={$value}";
                 }
             } else {
@@ -776,8 +791,8 @@ class mxUtils
                     ++$cont;
                 }
 
-                $style = substr($style, 0, $index).$tmp.
-                    (($cont > $index) ? substr($style, $cont) : '');
+                $style = \Safe\substr($style, 0, $index).$tmp.
+                    (((int) $cont > $index) ? \Safe\substr($style, (int) $cont) : '');
             }
         }
 
@@ -862,6 +877,8 @@ class mxUtils
      * @param mixed $flag
      * @param mixed $value
      *
+     * @throws \Safe\Exceptions\StringsException
+     *
      * @return mixed|string
      */
     public static function setStyleFlag($style, $key, $flag, $value)
@@ -888,9 +905,9 @@ class mxUtils
                 $tmp = '';
 
                 if (false === $cont) {
-                    $tmp = substr($style, $index + strlen($key) + 1);
+                    $tmp = \Safe\substr($style, $index + strlen($key) + 1);
                 } else {
-                    $tmp = substr($style, $index + strlen($key) + 1, $cont);
+                    $tmp = \Safe\substr($style, $index + strlen($key) + 1, $cont);
                 }
 
                 if (null == $value) {
@@ -901,8 +918,8 @@ class mxUtils
                     $tmp = $tmp & ~$flag;
                 }
 
-                $style = substr($style, 0, $index)."{$key}={$tmp}".
-                    (($cont >= 0) ? substr($style, $cont) : '');
+                $style = \Safe\substr($style, 0, $index)."{$key}={$tmp}".
+                    (((int) $cont >= 0) ? \Safe\substr($style, (int) $cont) : '');
             }
         }
 
@@ -1000,11 +1017,13 @@ class mxUtils
      *
      * @param mixed $filename
      *
+     * @throws \Safe\Exceptions\FilesystemException
+     *
      * @return false|string
      */
     public static function readFile($filename)
     {
-        return file_get_contents($filename);
+        return \Safe\file_get_contents($filename);
     }
 
     /**
@@ -1023,14 +1042,14 @@ class mxUtils
      * attributeName - Optional attribute name to check.
      * attributeValue - Optional attribute value to check.
      *
-     * @param object     $value
+     * @param DOMElement $value
      * @param null|mixed $nodeName
      * @param null|mixed $attributeName
      * @param null|mixed $attributeValue
      *
      * @return bool
      */
-    public static function isNode(object $value, $nodeName = null, $attributeName = null, $attributeValue = null): bool
+    public static function isNode(DOMElement $value, $nodeName = null, $attributeName = null, $attributeValue = null): bool
     {
         if ($value->nodeName && (null === $nodeName || 0 === strcasecmp($value->nodeName, $nodeName))) {
             return null === $attributeName || $value->getAttribute($attributeName) === $attributeValue;
@@ -1056,14 +1075,14 @@ class mxUtils
             // Parses data URIs of the form data:image/format;base64,xxx
             if (0 === strpos($url, 'data:image/')) {
                 $comma = strpos($url, ',');
-                $data = base64_decode(substr($url, $comma + 1), true);
+                $data = (string) \Safe\base64_decode(\Safe\substr($url, $comma + 1), true);
                 $img = imagecreatefromstring($data);
-            } elseif (preg_match('/.jpg/i', "{$url}")) {
-                $img = imagecreatefromjpeg($url);
-            } elseif (preg_match('/.png/i', "{$url}")) {
-                $img = imagecreatefrompng($url);
-            } elseif (preg_match('/.gif/i', "{$url}")) {
-                $img = imagecreatefromgif($url);
+            } elseif (\Safe\preg_match('/.jpg/i', "{$url}")) {
+                $img = \Safe\imagecreatefromjpeg($url);
+            } elseif (\Safe\preg_match('/.png/i', "{$url}")) {
+                $img = \Safe\imagecreatefrompng($url);
+            } elseif (\Safe\preg_match('/.gif/i', "{$url}")) {
+                $img = \Safe\imagecreatefromgif($url);
             }
         }
 
@@ -1145,6 +1164,8 @@ class mxUtils
      *
      * @param mixed $expression
      *
+     * @throws \Safe\Exceptions\StringsException
+     *
      * @return mixed
      */
     public static function evaluate($expression)
@@ -1152,8 +1173,8 @@ class mxUtils
         $pos = strpos($expression, '.');
 
         if (false !== $pos) {
-            $class = substr($expression, 0, $pos);
-            $field = substr($expression, $pos + 1);
+            $class = \Safe\substr($expression, 0, $pos);
+            $field = \Safe\substr($expression, $pos + 1);
             $vars = get_class_vars($class);
 
             if (isset($vars[$field])) {
@@ -1271,7 +1292,7 @@ class mxUtils
         $arr = debug_backtrace();
 
         foreach ($arr as $value) {
-            error_log($value['class'].'.'.$value['function']);
+            \Safe\error_log($value['class'].'.'.$value['function']);
         }
     }
 }

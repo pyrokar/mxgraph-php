@@ -4,6 +4,10 @@ declare(strict_types=1);
 
 namespace MxGraph;
 
+use Safe\Exceptions\ErrorfuncException;
+use Safe\Exceptions\FilesystemException;
+use Safe\Exceptions\StringsException;
+
 /**
  * Copyright (c) 2006-2013, Gaudenz Alder.
  */
@@ -77,7 +81,7 @@ class mxLog
      *
      * Holds the array of logfiles.
      *
-     * @var array<false|resource>
+     * @var array<resource>
      */
     public static $logfiles = [];
 
@@ -96,10 +100,12 @@ class mxLog
      * Adds a file for logging.
      *
      * @param string $filename
+     *
+     * @throws FilesystemException
      */
     public static function addLogfile(string $filename): void
     {
-        $fh = fopen($filename, 'ab');
+        $fh = \Safe\fopen($filename, 'ab');
         self::$logfiles[] = $fh;
     }
 
@@ -125,12 +131,14 @@ class mxLog
      * Logs a method exit.
      *
      * @param mixed $text
+     *
+     * @throws StringsException
      */
     public static function leave($text = ''): void
     {
         $t0 = array_pop(self::$current);
         $tab = self::$tab;
-        self::$tab = substr($tab, 0, strlen($tab) - 4);
+        self::$tab = \Safe\substr($tab, 0, -4);
         $dt = '(dt='.(microtime(true) - $t0).')';
         self::writeln("} {$dt} {$text}");
     }
@@ -183,12 +191,14 @@ class mxLog
      * Logs a warn trace.
      *
      * @param mixed $text
+     *
+     * @throws ErrorfuncException
      */
     public static function warn($text): void
     {
         if (self::$level_warn) {
             self::writeln($text);
-            error_log($text);
+            \Safe\error_log($text);
         }
     }
 
@@ -198,12 +208,14 @@ class mxLog
      * Logs an error trace.
      *
      * @param mixed $text
+     *
+     * @throws ErrorfuncException
      */
     public static function error($text): void
     {
         if (self::$level_error) {
             self::writeln($text);
-            error_log($text);
+            \Safe\error_log($text);
         }
     }
 
@@ -242,11 +254,13 @@ class mxLog
      * Function: close.
      *
      * Closes all open logfiles.
+     *
+     * @throws FilesystemException
      */
     public static function close(): void
     {
         foreach (self::$logfiles as $fh) {
-            fclose($fh);
+            \Safe\fclose($fh);
         }
     }
 }
