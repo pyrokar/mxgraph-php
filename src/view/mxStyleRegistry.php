@@ -18,6 +18,8 @@ class mxStyleRegistry
      * Variable: values
      *
      * Maps from strings to objects.
+     *
+     * @var array<string, string>
      */
     public static $values = [];
 
@@ -31,7 +33,7 @@ class mxStyleRegistry
      */
     public static function putValue($name, $value): void
     {
-        mxStyleRegistry::$values[$name] = $value;
+        self::$values[$name] = $value;
     }
 
     /**
@@ -40,10 +42,12 @@ class mxStyleRegistry
      * Returns the value associated with the given name.
      *
      * @param mixed $name
+     *
+     * @return null|mixed
      */
     public static function getValue($name)
     {
-        return (isset(mxStyleRegistry::$values[$name])) ? mxStyleRegistry::$values[$name] : null;
+        return self::$values[$name] ?? null;
     }
 
     /**
@@ -52,10 +56,12 @@ class mxStyleRegistry
      * Returns the name for the given value.
      *
      * @param mixed $value
+     *
+     * @return null|int|string
      */
     public static function getName($value)
     {
-        foreach (mxStyleRegistry::$values as $key => $val) {
+        foreach (self::$values as $key => $val) {
             if ($value === $val) {
                 return $key;
             }

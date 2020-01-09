@@ -13,6 +13,8 @@ class mxGdCanvas
      * Variable: antialias.
      *
      * Specifies if image aspect should be preserved in drawImage. Default is true.
+     *
+     * @var bool
      */
     public static $PRESERVE_IMAGE_ASPECT = true;
 
@@ -27,6 +29,8 @@ class mxGdCanvas
      *
      * Specifies if antialiasing should be enabled. Default is false. NOTE: GD
      * has a known bug where strokeWidths are ignored if this is enabled.
+     *
+     * @var bool
      */
     public $antialias = false;
 
@@ -34,6 +38,8 @@ class mxGdCanvas
      * Variable: enableTtf.
      *
      * Specifies if truetype fonts are enabled if available. Default is <mxConstants.TTF_ENABLED>.
+     *
+     * @var bool
      */
     public $enableTtf;
 
@@ -42,19 +48,25 @@ class mxGdCanvas
      *
      * Holds the color object for the shadow color defined in
      * <mxConstants.W3C_SHADOWCOLOR>.
+     *
+     * @var false | int
      */
     public $shadowColor;
 
     /**
      * Defines the base path for images with relative paths. Trailing slash
      * is required. Default is an empty string.
+     *
+     * @var string
      */
-    public $imageBasePath;
+    public $imageBasePath = '';
 
     /**
      * Variable: imageCache.
      *
      * Holds the image cache.
+     *
+     * @var array<resource>
      */
     public $imageCache = [];
 
@@ -71,6 +83,8 @@ class mxGdCanvas
      * Variable: height.
      *
      * Holds the height.
+     *
+     * @var float
      */
     public $scale;
 
@@ -84,14 +98,14 @@ class mxGdCanvas
      *
      * @param int    $width
      * @param int    $height
-     * @param int    $scale
+     * @param float  $scale
      * @param string $background
      * @param string $imageBasePath
      */
     public function __construct(
         int $width = 0,
         int $height = 0,
-        int $scale = 1,
+        float $scale = 1.0,
         string $background = null,
         string $imageBasePath = ''
     ) {
@@ -141,7 +155,7 @@ class mxGdCanvas
         if (!isset($img)) {
             $img = mxUtils::loadImage($url);
 
-            if (isset($img)) {
+            if ($img) {
                 $this->imageCache[$url] = $img;
             }
         }
@@ -171,7 +185,7 @@ class mxGdCanvas
 
             if (isset($this->image)) {
                 // KNOWN: Stroke widths are ignored by GD if antialias is on
-                imagesetthickness($this->image, $strokeWidth);
+                imagesetthickness($this->image, (int) $strokeWidth);
             }
 
             // Draws the start marker
@@ -523,7 +537,7 @@ class mxGdCanvas
             $strokeWidth = mxUtils::getValue($style, mxConstants::$STYLE_STROKEWIDTH, 1) * $this->scale;
 
             if (isset($this->image)) {
-                imagesetthickness($this->image, $strokeWidth);
+                imagesetthickness($this->image, (int) $strokeWidth);
             }
 
             if ($shape == mxConstants::$SHAPE_ELLIPSE) {
@@ -1072,34 +1086,36 @@ class mxGdCanvas
     /**
      * Function: drawText.
      *
-     * @param string $string
-     * @param int    $x
-     * @param int    $y
-     * @param int    $w
-     * @param int    $h
-     * @param array  $style
+     * @param string                $string
+     * @param int                   $x
+     * @param int                   $y
+     * @param int                   $w
+     * @param int                   $h
+     * @param array<string, string> $style
      */
     public function drawText(string $string, int $x, int $y, int $w, int $h, array $style): void
     {
-        if ('string' === gettype($string) && strlen($string) > 0) {
-            // Draws the label background and border
-            $bg = mxUtils::getValue($style, mxConstants::$STYLE_LABEL_BACKGROUNDCOLOR);
-            $border = mxUtils::getValue($style, mxConstants::$STYLE_LABEL_BORDERCOLOR);
+        if ('' === $string) {
+            return;
+        }
 
-            if (null != $bg || null != $border) {
-                $w += 2;
-                $x -= 2;
-                --$y;
+        // Draws the label background and border
+        $bg = $style[mxConstants::$STYLE_LABEL_BACKGROUNDCOLOR] ?? null;
+        $border = $style[mxConstants::$STYLE_LABEL_BORDERCOLOR] ?? null;
 
-                $this->drawRect($x, $y, $w, $h, $bg, $border, false);
-            }
+        if (null != $bg || null != $border) {
+            $w += 2;
+            $x -= 2;
+            --$y;
 
-            // Draws the label string
-            if ($this->enableTtf && function_exists('imagettftext')) {
-                $this->drawTtfText($string, $x, $y, $w, $h, $style);
-            } else {
-                $this->drawFixedText($string, $x, $y, $w, $h, $style);
-            }
+            $this->drawRect($x, $y, $w, $h, $bg, $border, false);
+        }
+
+        // Draws the label string
+        if ($this->enableTtf && function_exists('imagettftext')) {
+            $this->drawTtfText($string, $x, $y, $w, $h, $style);
+        } else {
+            $this->drawFixedText($string, $x, $y, $w, $h, $style);
         }
     }
 
@@ -1413,9 +1429,9 @@ class mxGdCanvas
      * @param string $hex
      * @param string $default
      *
-     * @return null|int
+     * @return false|int
      */
-    public function getColor(string $hex, string $default = null): ?int
+    public function getColor(string $hex, string $default = null)
     {
         if (!$hex) {
             $hex = $default;
@@ -1465,29 +1481,22 @@ class mxGdCanvas
      * Creates a new array of x, y sequences where the each coordinate is
      * translated by dx and dy, respectively.
      *
-     * @param mixed      $points
+     * @param array<int> $points
      * @param null|mixed $dx
      * @param null|mixed $dy
      *
-     * @return array
+     * @return array<int>
      */
-    public function offset($points, $dx = null, $dy = null)
+    public function offset($points, $dx = null, $dy = null): array
     {
         $result = [];
 
-        if (null != $points) {
-            if (!isset($dx)) {
-                $dx = mxConstants::$SHADOW_OFFSETX;
-            }
+        $dx = $dx ?? mxConstants::$SHADOW_OFFSETX;
+        $dy = $dy ?? mxConstants::$SHADOW_OFFSETY;
 
-            if (!isset($dy)) {
-                $dy = mxConstants::$SHADOW_OFFSETY;
-            }
-
-            for ($i = 0; $i < sizeof($points) - 1; $i = $i + 2) {
-                $result[] = $points[$i] + $dx;
-                $result[] = $points[$i + 1] + $dy;
-            }
+        for ($i = 0; $i < count($points) - 1; $i += 2) {
+            $result[] = $points[$i] + $dx;
+            $result[] = $points[$i + 1] + $dy;
         }
 
         return $result;

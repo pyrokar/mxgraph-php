@@ -28,6 +28,8 @@ class mxGraphView extends mxEventSource
      * Variable: EMPTY_POINT
      *
      * An empty <mxPoint> instance.
+     *
+     * @var mxPoint
      */
     public $EMPTY_POINT;
 
@@ -44,6 +46,8 @@ class mxGraphView extends mxEventSource
      * Variable: graphBounds.
      *
      * Holds the bounds of the current view.
+     *
+     * @var mxRectangle
      */
     public $graphBounds;
 
@@ -51,13 +55,17 @@ class mxGraphView extends mxEventSource
      * Variable: scale.
      *
      * Holds the current scale.
+     *
+     * @var float
      */
-    public $scale = 1;
+    public $scale = 1.0;
 
     /**
      * Variable: translate.
      *
      * Holds the current translate.
+     *
+     * @var mxPoint
      */
     public $translate;
 
@@ -65,6 +73,8 @@ class mxGraphView extends mxEventSource
      * Variable: states.
      *
      * Maps from cells to states.
+     *
+     * @var array<string, mxCellState>
      */
     public $states = [];
 
@@ -73,9 +83,9 @@ class mxGraphView extends mxEventSource
      *
      * Constructs a new view for the specified <mxGraph>.
      *
-     * @param mixed $graph
+     * @param mxGraph $graph
      */
-    public function __construct($graph)
+    public function __construct(mxGraph $graph)
     {
         $this->EMPTY_POINT = new mxPoint();
         $this->graph = $graph;
@@ -89,13 +99,13 @@ class mxGraphView extends mxEventSource
      * Sets the scale, revalidates the view and fires
      * a scale event.
      *
-     * @param mixed $scale
+     * @param float $scale
      */
-    public function setScale($scale): void
+    public function setScale(float $scale): void
     {
         $previous = $this->scale;
 
-        if ($this->scale != $scale) {
+        if ($this->scale !== $scale) {
             $this->scale = $scale;
             $this->revalidate();
         }
@@ -128,8 +138,10 @@ class mxGraphView extends mxEventSource
      * Function: getGraphBounds.
      *
      * Returns <graphBounds>.
+     *
+     * @return mxRectangle
      */
-    public function getGraphBounds()
+    public function getGraphBounds(): mxRectangle
     {
         return $this->graphBounds;
     }
@@ -139,11 +151,11 @@ class mxGraphView extends mxEventSource
      *
      * Sets <graphBounds>.
      *
-     * @param mixed $value
+     * @param mxRectangle $bounds
      */
-    public function setGraphBounds($value): void
+    public function setGraphBounds($bounds): void
     {
-        $this->graphBounds = $value;
+        $this->graphBounds = $bounds;
     }
 
     /**
@@ -1392,8 +1404,10 @@ class mxGraphView extends mxEventSource
      * Returns the <mxCellStates> for the given array of <mxCells>. The array
      * contains all states that are not null, that is, the returned array may
      * have less elements than the given array.
+     *
+     * @return array<string, mxCellState>
      */
-    public function getStates()
+    public function getStates(): array
     {
         return $this->states;
     }
@@ -1405,19 +1419,18 @@ class mxGraphView extends mxEventSource
      * contains all states that are not null, that is, the returned array may
      * have less elements than the given array.
      *
-     * @param mixed $cells
+     * @param array<mxCell> $cells
      *
-     * @return array
+     * @return array<mxCellState>
      */
-    public function getCellStates($cells)
+    public function getCellStates($cells): array
     {
         $result = [];
-        $count = count($cells);
 
-        for ($i = 0; $i < $count; ++$i) {
-            $state = $this->getState($cells[$i]);
+        foreach ($cells as $cell) {
+            $state = $this->getState($cell);
 
-            if (null != $state) {
+            if ($state) {
                 $result[] = $state;
             }
         }

@@ -27,6 +27,8 @@ class mxGraphViewImageReader
      * Variable: canvas
      *
      * Holds the canvas.
+     *
+     * @var mxGdCanvas
      */
     public $canvas;
 
@@ -35,6 +37,8 @@ class mxGraphViewImageReader
      *
      * Holds the global scale of the graph. This is set just before
      * createCanvas is called.
+     *
+     * @var int
      */
     public $scale = 1;
 
@@ -42,6 +46,8 @@ class mxGraphViewImageReader
      * Variable: parser.
      *
      * Holds the SAX parser.
+     *
+     * @var resource
      */
     public $parser;
 
@@ -49,6 +55,8 @@ class mxGraphViewImageReader
      * Variable: background.
      *
      * Holds the background color.
+     *
+     * @var string
      */
     public $background;
 
@@ -56,6 +64,8 @@ class mxGraphViewImageReader
      * Variable: border.
      *
      * Holds the border size. Default is 0.
+     *
+     * @var int
      */
     public $border;
 
@@ -88,7 +98,7 @@ class mxGraphViewImageReader
      *
      * @return mxGdCanvas
      */
-    public function createCanvas($attrs)
+    public function createCanvas($attrs): mxGdCanvas
     {
         $width = $attrs['x'] + $attrs['width'] + $this->border + 1;
         $height = $attrs['y'] + $attrs['height'] + $this->border + 1;
@@ -117,7 +127,7 @@ class mxGraphViewImageReader
      */
     public function readFile($filename): void
     {
-        $fp = fopen($filename, 'r');
+        $fp = fopen($filename, 'rb');
 
         while ($data = fread($fp, 4096)) {
             xml_parse($this->parser, $data, feof($fp)) or
@@ -142,13 +152,13 @@ class mxGraphViewImageReader
      */
     public function startElement($parser, $name, $attrs): void
     {
-        if (null == $this->canvas && 'graph' == $name) {
+        if (null === $this->canvas && 'graph' === $name) {
             $this->scale = mxUtils::getValue($attrs, 'scale', 1);
             $this->canvas = $this->createCanvas($attrs);
-        } elseif (null != $this->canvas) {
-            $edge = 'edge' == $name;
-            $group = 'group' == $name;
-            $vertex = 'vertex' == $name;
+        } elseif (null !== $this->canvas) {
+            $edge = 'edge' === $name;
+            $group = 'group' === $name;
+            $vertex = 'vertex' === $name;
 
             if (($edge && isset($attrs['points'])) ||
                 (
@@ -186,20 +196,20 @@ class mxGraphViewImageReader
         $state->height = mxUtils::getNumber($style, 'height');
 
         // Parses the absolute points list
-        $tmp = mxUtils::getValue($style, 'points');
+        $tmp = (string) mxUtils::getValue($style, 'points');
 
-        if (strlen($tmp) > 0) {
+        if ('' !== $tmp) {
             $pts = $this->parsePoints($tmp);
 
-            if (sizeof($pts) > 0) {
+            if (count($pts) > 0) {
                 $state->absolutePoints = $pts;
             }
         }
 
         // Parses the label and label bounds
-        $label = mxUtils::getValue($style, 'label');
+        $label = (string) mxUtils::getValue($style, 'label');
 
-        if (null != $label && strlen($label) > 0) {
+        if ('' !== $label) {
             $offset = new mxPoint(
                 mxUtils::getNumber($style, 'dx'),
                 mxUtils::getNumber($style, 'dy')
@@ -224,15 +234,15 @@ class mxGraphViewImageReader
      * Parses a string that represents a list of points into an array of
      * <mxPoints>.
      *
-     * @param mixed $str
+     * @param string $str
      *
-     * @return array
+     * @return array<mxPoint>
      */
-    public function parsePoints($str)
+    public function parsePoints(string $str): array
     {
         $pts = [];
 
-        if (isset($str)) {
+        if ('' !== $str) {
             $len = strlen($str);
             $tmp = '';
             $x = '';
@@ -240,11 +250,11 @@ class mxGraphViewImageReader
             for ($i = 0; $i < $len; ++$i) {
                 $c = $str[$i];
 
-                if (',' == $c || ' ' == $c) {
-                    if (0 == strlen($x)) {
+                if (',' === $c || ' ' === $c) {
+                    if ('' === $x) {
                         $x = $tmp;
                     } else {
-                        array_push($pts, new mxPoint($x, $tmp));
+                        $pts[] = new mxPoint($x, $tmp);
                         $x = '';
                     }
 
@@ -254,7 +264,7 @@ class mxGraphViewImageReader
                 }
             }
 
-            array_push($pts, new mxPoint($x, $tmp));
+            $pts[] = new mxPoint($x, $tmp);
         }
 
         return $pts;

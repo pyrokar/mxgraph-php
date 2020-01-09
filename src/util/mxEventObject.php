@@ -17,6 +17,8 @@ class mxEventObject
      * Variable: name
      *
      * Holds the name of the event.
+     *
+     * @var string
      */
     public $name;
 
@@ -25,6 +27,8 @@ class mxEventObject
      *
      * Holds the event properties in an associative array that maps from string
      * (key) to object (value).
+     *
+     * @var array<string, object>
      */
     public $properties;
 
@@ -32,6 +36,8 @@ class mxEventObject
      * Variable: consumed.
      *
      * Holds the consumed state of the event. Default is false.
+     *
+     * @var bool
      */
     public $consumed = false;
 
@@ -42,15 +48,15 @@ class mxEventObject
      * properties are specified using a sequence of keys and values, eg.
      * new mxEventObject($name, $key1, $value1, $key2, $value2, .., $keyN, $valueN)
      *
-     * @param mixed $name
+     * @param string $name
      */
-    public function __construct($name)
+    public function __construct(string $name)
     {
         $this->name = $name;
         $this->properties = [];
         $args = func_get_args();
 
-        for ($i = 1; $i < sizeof($args); $i += 2) {
+        for ($i = 1, $iMax = count($args); $i < $iMax; $i += 2) {
             if (isset($args[$i + 1])) {
                 $this->properties[$args[$i]] = $args[$i + 1];
             }
@@ -61,8 +67,10 @@ class mxEventObject
      * Function: getName.
      *
      * Returns <name>.
+     *
+     * @return string
      */
-    public function getName()
+    public function getName(): string
     {
         return $this->name;
     }
@@ -71,8 +79,10 @@ class mxEventObject
      * Function: getProperties.
      *
      * Returns <properties>.
+     *
+     * @return array<string, object>
      */
-    public function getProperties()
+    public function getProperties(): array
     {
         return $this->properties;
     }
@@ -82,9 +92,11 @@ class mxEventObject
      *
      * Returns the property value for the given key.
      *
-     * @param mixed $key
+     * @param string $key
+     *
+     * @return object
      */
-    public function getProperty($key)
+    public function getProperty(string $key): object
     {
         return $this->properties[$key];
     }
@@ -93,8 +105,10 @@ class mxEventObject
      * Function: isConsumed.
      *
      * Returns true if the event has been consumed.
+     *
+     * @return bool
      */
-    public function isConsumed()
+    public function isConsumed(): bool
     {
         return $this->consumed;
     }

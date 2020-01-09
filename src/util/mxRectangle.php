@@ -17,6 +17,8 @@ class mxRectangle extends mxPoint
      * Variable: width
      *
      * Holds the width of the rectangle. Default is 0.
+     *
+     * @var float
      */
     public $width = 0;
 
@@ -24,6 +26,8 @@ class mxRectangle extends mxPoint
      * Variable: height.
      *
      * Holds the height of the rectangle. Default is 0.
+     *
+     * @var float
      */
     public $height = 0;
 
@@ -68,8 +72,10 @@ class mxRectangle extends mxPoint
      * Function: getCenterX.
      *
      * Returns the x-coordinate of the center point.
+     *
+     * @return float
      */
-    public function getCenterX()
+    public function getCenterX(): float
     {
         return $this->x + $this->width / 2;
     }
@@ -78,8 +84,10 @@ class mxRectangle extends mxPoint
      * Function: getCenterY.
      *
      * Returns the y-coordinate of the center point.
+     *
+     * @return float
      */
-    public function getCenterY()
+    public function getCenterY(): float
     {
         return $this->y + $this->height / 2;
     }
@@ -130,7 +138,7 @@ class mxRectangle extends mxPoint
      *
      * @return bool
      */
-    public function equals($obj)
+    public function equals($obj): bool
     {
         if ($obj instanceof self) {
             return $obj->x === $this->x && $obj->y === $this->y &&
@@ -144,6 +152,8 @@ class mxRectangle extends mxPoint
      * Function: copy.
      *
      * Returns a copy of this <mxRectangle>.
+     *
+     * @return self
      */
     public function copy()
     {

@@ -17,6 +17,8 @@ class mxLog
      * Variable: level_fine
      *
      * Specifies the fine logging level.
+     *
+     * @var bool
      */
     public static $level_fine = true;
 
@@ -24,6 +26,8 @@ class mxLog
      * Variable: level_debug.
      *
      * Specifies the debug logging level.
+     *
+     * @var bool
      */
     public static $level_debug = true;
 
@@ -31,6 +35,8 @@ class mxLog
      * Variable: level_info.
      *
      * Specifies the info logging level.
+     *
+     * @var bool
      */
     public static $level_info = true;
 
@@ -38,6 +44,8 @@ class mxLog
      * Variable: level_warn.
      *
      * Specifies the warn logging level.
+     *
+     * @var bool
      */
     public static $level_warn = true;
 
@@ -45,20 +53,22 @@ class mxLog
      * Variable: level_error.
      *
      * Specifies the error logging level.
+     *
+     * @var bool
      */
     public static $level_error = true;
 
     /**
      * Variable: current.
      *
-     * Default is true.
+     * @var array<float>
      */
     public static $current = [];
 
     /**
      * Variable: tab.
      *
-     * Default is true.
+     * @var string
      */
     public static $tab = '';
 
@@ -66,6 +76,8 @@ class mxLog
      * Variable: logfiles.
      *
      * Holds the array of logfiles.
+     *
+     * @var array<false|resource>
      */
     public static $logfiles = [];
 
@@ -73,6 +85,8 @@ class mxLog
      * Variable: printLog.
      *
      * Specifies if the log should be printed out.
+     *
+     * @var bool
      */
     public static $printLog = false;
 
@@ -81,12 +95,12 @@ class mxLog
      *
      * Adds a file for logging.
      *
-     * @param mixed $filename
+     * @param string $filename
      */
-    public static function addLogfile($filename): void
+    public static function addLogfile(string $filename): void
     {
-        $fh = fopen($filename, 'a');
-        array_push(mxLog::$logfiles, $fh);
+        $fh = fopen($filename, 'ab');
+        self::$logfiles[] = $fh;
     }
 
     /**
@@ -99,10 +113,10 @@ class mxLog
      */
     public static function enter($method, $text = ''): void
     {
-        mxLog::writeln("{$method}: { {$text}");
-        $t0 = microtime(true);
-        array_push(mxLog::$current, $t0);
-        mxLog::$tab .= '    ';
+        self::writeln("{$method}: { {$text}");
+        $t0 = (float) microtime(true);
+        self::$current[] = $t0;
+        self::$tab .= '    ';
     }
 
     /**
@@ -114,11 +128,11 @@ class mxLog
      */
     public static function leave($text = ''): void
     {
-        $t0 = array_pop(mxLog::$current);
-        $tab = mxLog::$tab;
-        mxLog::$tab = substr($tab, 0, strlen($tab) - 4);
+        $t0 = array_pop(self::$current);
+        $tab = self::$tab;
+        self::$tab = substr($tab, 0, strlen($tab) - 4);
         $dt = '(dt='.(microtime(true) - $t0).')';
-        mxLog::writeln("} {$dt} {$text}");
+        self::writeln("} {$dt} {$text}");
     }
 
     /**
@@ -130,8 +144,8 @@ class mxLog
      */
     public static function fine($text): void
     {
-        if (mxLog::$level_fine) {
-            mxLog::writeln($text);
+        if (self::$level_fine) {
+            self::writeln($text);
         }
     }
 
@@ -144,8 +158,8 @@ class mxLog
      */
     public static function debug($text): void
     {
-        if (mxLog::$level_debug) {
-            mxLog::writeln($text);
+        if (self::$level_debug) {
+            self::writeln($text);
         }
     }
 
@@ -158,8 +172,8 @@ class mxLog
      */
     public static function info($text): void
     {
-        if (mxLog::$level_info) {
-            mxLog::writeln($text);
+        if (self::$level_info) {
+            self::writeln($text);
         }
     }
 
@@ -172,8 +186,8 @@ class mxLog
      */
     public static function warn($text): void
     {
-        if (mxLog::$level_warn) {
-            mxLog::writeln($text);
+        if (self::$level_warn) {
+            self::writeln($text);
             error_log($text);
         }
     }
@@ -187,8 +201,8 @@ class mxLog
      */
     public static function error($text): void
     {
-        if (mxLog::$level_error) {
-            mxLog::writeln($text);
+        if (self::$level_error) {
+            self::writeln($text);
             error_log($text);
         }
     }
@@ -202,7 +216,7 @@ class mxLog
      */
     public static function writeln($text): void
     {
-        mxLog::write("{$text}\n");
+        self::write("{$text}\n");
     }
 
     /**
@@ -214,11 +228,11 @@ class mxLog
      */
     public static function write($text): void
     {
-        $msg = date('Y-m-d H:i:s').': '.mxLog::$tab.$text;
-        foreach (mxLog::$logfiles as $fh) {
+        $msg = date('Y-m-d H:i:s').': '.self::$tab.$text;
+        foreach (self::$logfiles as $fh) {
             fputs($fh, $msg);
         }
-        if (mxLog::$printLog) {
+        if (self::$printLog) {
             $msg = str_replace(' ', '&nbsp;', $msg);
             echo "{$msg}<br>";
         }
@@ -231,7 +245,7 @@ class mxLog
      */
     public static function close(): void
     {
-        foreach (mxLog::$logfiles as $fh) {
+        foreach (self::$logfiles as $fh) {
             fclose($fh);
         }
     }

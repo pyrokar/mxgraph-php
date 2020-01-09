@@ -20,6 +20,8 @@ class mxGeometry extends mxRectangle
      * Variable: TRANSLATE_CONTROL_POINTS
      *
      * Global switch to translate the points in translate. Default is true.
+     *
+     * @var bool
      */
     public static $TRANSLATE_CONTROL_POINTS = true;
 
@@ -65,7 +67,7 @@ class mxGeometry extends mxRectangle
      *
      * @var mxPoint[]
      */
-    public $points;
+    public $points = [];
 
     /**
      * Variable: offset.
@@ -73,6 +75,8 @@ class mxGeometry extends mxRectangle
      * Holds the offset of the label for edges. This is the absolute vector
      * between the center of the edge and the top, left point of the label.
      * Default is null.
+     *
+     * @var mxPoint | null
      */
     public $offset;
 
@@ -83,6 +87,8 @@ class mxGeometry extends mxRectangle
      * relative coordinates. Default is false. This is used to mark a geometry
      * with an x- and y-coordinate that is used to describe an edge label
      * position.
+     *
+     * @var bool
      */
     public $relative = false;
 
@@ -113,11 +119,11 @@ class mxGeometry extends mxRectangle
      * isSource - Boolean that specifies if the source or target point
      * should be returned.
      *
-     * @param mixed $isSource
+     * @param bool $isSource
      *
      * @return mxPoint
      */
-    public function getTerminalPoint($isSource): ?mxPoint
+    public function getTerminalPoint(bool $isSource): ?mxPoint
     {
         return ($isSource) ? $this->sourcePoint : $this->targetPoint;
     }
@@ -188,7 +194,7 @@ class mxGeometry extends mxRectangle
         }
 
         // Translate the control points
-        if (self::$TRANSLATE_CONTROL_POINTS && null != $this->points) {
+        if (self::$TRANSLATE_CONTROL_POINTS) {
             foreach ($this->points as $point) {
                 $point->x += $dx;
                 $point->y += $dy;
@@ -200,18 +206,16 @@ class mxGeometry extends mxRectangle
      * Function: copy.
      *
      * Returns a copy of this <mxGeometry>.
+     *
+     * @return self
      */
-    public function copy()
+    public function copy(): self
     {
         $clone = new mxGeometry($this->x, $this->y, $this->width, $this->height);
 
         // Clones the points
-        if (null != $this->points) {
-            $clone->points = [];
-
-            foreach ($this->points as $point) {
-                $clone->points[] = $point->copy();
-            }
+        foreach ($this->points as $point) {
+            $clone->points[] = $point->copy();
         }
 
         // Clones the alternatebounds

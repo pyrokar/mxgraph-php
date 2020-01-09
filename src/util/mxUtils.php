@@ -393,34 +393,23 @@ class mxUtils
      * the given list by the given vector. Elements that are not mxPoints are
      * added to the result as-is.
      *
-     * @param mixed $pts
-     * @param mixed $dx
-     * @param mixed $dy
+     * @param mxPoint[] $points
+     * @param int       $dx
+     * @param int       $dy
      *
-     * @return null|array
+     * @return mxPoint[]
      */
-    public static function translatePoints($pts, $dx, $dy): ?array
+    public static function translatePoints(array $points, $dx, $dy): array
     {
-        $result = null;
+        $result = [];
 
-        if (null != $pts) {
-            $result = [];
-            $pointCount = sizeof($pts);
+        foreach ($points as $origPoint) {
+            $point = $origPoint->copy();
 
-            for ($i = 0; $i < $pointCount; ++$i) {
-                $obj = $pts[$i];
+            $point->x += $dx;
+            $point->y += $dy;
 
-                if ($obj instanceof mxPoint) {
-                    $point = $obj->copy();
-
-                    $point->x += $dx;
-                    $point->y += $dy;
-
-                    array_push($result, $point);
-                } else {
-                    array_push($result, $obj);
-                }
-            }
+            $result[] = $point;
         }
 
         return $result;
@@ -563,21 +552,19 @@ class mxUtils
      *
      * style - String of the form [stylename;|key=value;].
      *
-     * @param mixed $style
+     * @param string $style
      *
-     * @return array
+     * @return array<string>
      */
-    public static function getStylenames($style): array
+    public static function getStylenames($style = ''): array
     {
         $result = [];
 
-        if (isset($style)) {
-            $pairs = explode(';', $style);
+        $pairs = explode(';', $style);
 
-            for ($i = 0; $i < sizeof($pairs); ++$i) {
-                if (false === strpos($pairs[$i], '=')) {
-                    array_push($result, $pairs[$i]);
-                }
+        foreach ($pairs as $iValue) {
+            if (false === strpos($iValue, '=')) {
+                $result[] = $iValue;
             }
         }
 
@@ -934,23 +921,15 @@ class mxUtils
      * key - Key whose value should be returned.
      * default - Default value to return if the key is undefined. Default is null.
      *
-     * @param array      $dict
-     * @param mixed      $key
-     * @param null|mixed $default
+     * @param array<string, mixed> $dict
+     * @param string               $key
+     * @param null|mixed           $default
      *
      * @return null|mixed
      */
-    public static function getValue(array $dict, $key, $default = null)
+    public static function getValue(array $dict, string $key, $default = null)
     {
-        $value = null;
-
-        if (isset($dict[$key])) {
-            $value = $dict[$key];
-        } else {
-            $value = $default;
-        }
-
-        return $value;
+        return $dict[$key] ?? $default;
     }
 
     /**
@@ -988,20 +967,22 @@ class mxUtils
      * array - Array to check for the given obj.
      * obj - Object to find in the given array.
      *
-     * @param mixed $array
-     * @param mixed $object
+     * @param array<mixed> $array
+     * @param mixed        $object
      *
      * @return int
      */
-    public static function indexOf($array, $object): int
+    public static function indexOf(array $array, $object): int
     {
-        if (null != $array) {
-            $len = sizeof($array);
+        if (empty($array)) {
+            return -1;
+        }
 
-            for ($i = 0; $i < $len; ++$i) {
-                if ($array[$i] === $object) {
-                    return $i;
-                }
+        $len = count($array);
+
+        for ($i = 0; $i < $len; ++$i) {
+            if ($array[$i] === $object) {
+                return $i;
             }
         }
 
@@ -1042,19 +1023,17 @@ class mxUtils
      * attributeName - Optional attribute name to check.
      * attributeValue - Optional attribute value to check.
      *
-     * @param mixed      $value
+     * @param object     $value
      * @param null|mixed $nodeName
      * @param null|mixed $attributeName
      * @param null|mixed $attributeValue
      *
      * @return bool
      */
-    public static function isNode($value, $nodeName = null, $attributeName = null, $attributeValue = null): bool
+    public static function isNode(object $value, $nodeName = null, $attributeName = null, $attributeValue = null): bool
     {
-        if (null != $value && (null == $nodeName ||
-            0 == strcasecmp($value->nodeName, $nodeName))) {
-            return null == $attributeName ||
-                $value->getAttribute($attributeName) == $attributeValue;
+        if ($value->nodeName && (null === $nodeName || 0 === strcasecmp($value->nodeName, $nodeName))) {
+            return null === $attributeName || $value->getAttribute($attributeName) === $attributeValue;
         }
 
         return false;
@@ -1065,15 +1044,15 @@ class mxUtils
      *
      * Loads an image from the local filesystem, a data URI or any other URL.
      *
-     * @param mixed $url
+     * @param string $url
      *
      * @return null|false|resource
      */
-    public static function loadImage($url)
+    public static function loadImage(string $url)
     {
         $img = null;
 
-        if (isset($url)) {
+        if ('' !== $url) {
             // Parses data URIs of the form data:image/format;base64,xxx
             if (0 === strpos($url, 'data:image/')) {
                 $comma = strpos($url, ',');

@@ -17,6 +17,8 @@ class mxHtmlCanvas extends mxGdCanvas
      * Variable: html
      *
      * Holds the html markup.
+     *
+     * @var string
      */
     public $html;
 

@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace MxGraph;
 
+use DOMDocument;
 use DOMElement;
+use DOMNode;
 use Exception;
 
 /**
@@ -22,6 +24,8 @@ class mxCodec
      * Variable: document
      *
      * The owner document of the codec.
+     *
+     * @var DOMDocument
      */
     public $document;
 
@@ -29,6 +33,8 @@ class mxCodec
      * Variable: objects.
      *
      * Maps from IDs to objects.
+     *
+     * @var array<string, object>
      */
     public $objects = [];
 
@@ -36,14 +42,18 @@ class mxCodec
      * Variable: elements.
      *
      * Maps from IDs to elements.
+     *
+     * @var array<string, DOMNode>
      */
-    public $elements;
+    public $elements = [];
 
     /**
      * Variable: encodeDefaults.
      *
      * Specifies if default values should be encoded.
      * Default is false.
+     *
+     * @var bool
      */
     public $encodeDefaults = false;
 
@@ -52,15 +62,11 @@ class mxCodec
      *
      * Constructs a new HTML graph view reader.
      *
-     * @param null|mixed $document
+     * @param DOMDocument $document
      */
-    public function __construct($document = null)
+    public function __construct(DOMDocument $document = null)
     {
-        if (!$document) {
-            $document = mxUtils::createXmlDocument();
-        }
-
-        $this->document = $document;
+        $this->document = $document ?? mxUtils::createXmlDocument();
     }
 
     /**
@@ -93,33 +99,31 @@ class mxCodec
      * object. If no object is found, then the element with the respective ID
      * from the document is parsed using <decode>.
      *
-     * @param mixed $id
+     * @param int $id
      *
      * @throws Exception
      *
-     * @return null|mixed
+     * @return object | null
      */
-    public function getObject($id)
+    public function getObject(int $id): ?object
     {
-        $obj = null;
-
-        if (isset($id)) {
-            $obj = $this->objects[$id];
-
-            if (!isset($obj)) {
-                $obj = $this->lookup($id);
-
-                if (!isset($obj)) {
-                    $node = $this->getElementById($id);
-
-                    if (isset($node)) {
-                        $obj = $this->decode($node);
-                    }
-                }
-            }
+        if (isset($this->objects[$id])) {
+            return $this->objects[$id];
         }
 
-        return $obj;
+        $obj = $this->lookup($id);
+
+        if ($obj) {
+            return $obj;
+        }
+
+        $node = $this->getElementById($id);
+
+        if (isset($node)) {
+            return $this->decode($node);
+        }
+
+        return null;
     }
 
     /**
@@ -133,9 +137,11 @@ class mxCodec
      *
      * id - ID of the object to be returned.
      *
-     * @param mixed $id
+     * @param int $id
+     *
+     * @return object | null
      */
-    public function lookup($id)
+    public function lookup(int $id): ?object
     {
         return null;
     }
@@ -155,8 +161,7 @@ class mxCodec
      */
     public function getElementById($id)
     {
-        if (null == $this->elements) {
-            $this->elements = [];
+        if (empty($this->elements)) {
             $this->addElement($this->document->documentElement);
         }
 
@@ -168,21 +173,21 @@ class mxCodec
      *
      * Adds the given element to <elements> if it has an ID.
      *
-     * @param mixed $node
+     * @param DOMNode $node
      */
-    public function addElement($node): void
+    public function addElement(DOMNode $node): void
     {
         if ($node instanceof DOMElement) {
             $id = $node->getAttribute('id');
 
-            if (null != $id && null == $this->elements[$id]) {
+            if ('' !== $id && null == $this->elements[$id]) {
                 $this->elements[$id] = $node;
             }
         }
 
         $node = $node->firstChild;
 
-        while (null != $node) {
+        while ($node) {
             $this->addElement($node);
             $node = $node->nextSibling;
         }
@@ -203,23 +208,23 @@ class mxCodec
      *
      * @param mixed $obj
      *
-     * @return null|false|string
+     * @return string | null
      */
-    public function getId($obj)
+    public function getId($obj): ?string
     {
         $id = null;
 
         if (isset($obj)) {
             $id = $this->reference($obj);
 
-            if (!isset($id) && 'mxCell' == mxCodecRegistry::getName($obj)) {
+            if (!$id && $obj instanceof mxCell) {
                 $id = $obj->getId();
 
                 if (!isset($id)) {
                     // Uses an on-the-fly Id
                     $id = mxCellPath::create($obj);
 
-                    if (0 == strlen($id)) {
+                    if ('' === $id) {
                         $id = 'root';
                     }
                 }
@@ -241,8 +246,10 @@ class mxCodec
      * obj - Object whose ID should be returned.
      *
      * @param mixed $obj
+     *
+     * @return string | null
      */
-    public function reference($obj)
+    public function reference($obj): ?string
     {
         return null;
     }

@@ -2,6 +2,14 @@
 /**
  * Copyright (c) 2006, Gaudenz Alder
  */
+
+use MxGraph\mxCodec;
+use MxGraph\mxConstants;
+use MxGraph\mxGraph;
+use MxGraph\mxGraphModel;
+use MxGraph\mxPoint;
+use MxGraph\mxUtils;
+
 include_once("../src/mxServer.php");
 
 /**

@@ -17,6 +17,8 @@ class mxPoint
      * Variable: x
      *
      * Holds the x-coordinate of the point. Default is 0.
+     *
+     * @var float
      */
     public $x = 0;
 
@@ -24,6 +26,8 @@ class mxPoint
      * Variable: y.
      *
      * Holds the y-coordinate of the point. Default is 0.
+     *
+     * @var float
      */
     public $y = 0;
 
@@ -48,12 +52,13 @@ class mxPoint
      * Returns true if the given object equals this point.
      *
      * @param mixed $obj
+     *
+     * @return bool
      */
-    public function equals($obj)
+    public function equals($obj): bool
     {
-        if ($obj instanceof mxPoint) {
-            return $obj->x == $this->x &&
-                $obj->y == $this->y;
+        if ($obj instanceof self) {
+            return $obj->x === $this->x && $obj->y === $this->y;
         }
 
         return false;
@@ -63,6 +68,8 @@ class mxPoint
      * Function: copy.
      *
      * Returns a copy of this <mxPoint>.
+     *
+     * @return mxPoint
      */
     public function copy()
     {

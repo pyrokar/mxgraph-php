@@ -17,6 +17,8 @@ class mxEvent
      * Variable: GRAPH_MODEL_CHANGED
      *
      * Defines the name of the graphModelChanged event.
+     *
+     * @var string
      */
     public static $GRAPH_MODEL_CHANGED = 'graphModelChanged';
 
@@ -24,6 +26,8 @@ class mxEvent
      * Variable: SCALE.
      *
      * Defines the name of the scale event.
+     *
+     * @var string
      */
     public static $SCALE = 'scale';
 
@@ -31,6 +35,8 @@ class mxEvent
      * Variable: TRANSLATE.
      *
      * Defines the name of the translate event.
+     *
+     * @var string
      */
     public static $TRANSLATE = 'translate';
 }

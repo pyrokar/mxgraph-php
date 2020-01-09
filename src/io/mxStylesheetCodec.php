@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace MxGraph;
 
 use DOMElement;
-use DOMNode;
 
 /**
  * Copyright (c) 2006-2013, Gaudenz Alder.
@@ -46,35 +45,33 @@ class mxStylesheetCodec extends mxObjectCodec
     /**
      * Override <mxObjectCodec.encode>.
      *
-     * @param DOMNode      $enc
+     * @param mxCodec      $enc
      * @param mxStylesheet $obj
      *
      * @return DOMElement
      */
-    public function encode($enc, $obj): DOMElement
+    public function encode(mxCodec $enc, $obj): DOMElement
     {
-        $node = $enc->ownerDocument->createElement($this->getName());
+        $node = $enc->document->createElement($this->getName());
 
         foreach ($obj->styles as $i => $style) {
-            $styleNode = $enc->ownerDocument->createElement('add');
+            $styleNode = $enc->document->createElement('add');
 
-            if (isset($i)) {
-                $styleNode->setAttribute('as', $i);
+            $styleNode->setAttribute('as', $i);
 
-                foreach ($style as $j => $value) {
-                    $value = $this->getStringValue($j, $value);
+            foreach ($style as $j => $value) {
+                $value = $this->getStringValue($j, $value);
 
-                    if (isset($value)) {
-                        $entry = $enc->ownerDocument->createElement('add');
-                        $entry->setAttribute('value', $value);
-                        $entry->setAttribute('as', $j);
-                        $styleNode->appendChild($entry);
-                    }
+                if (isset($value)) {
+                    $entry = $enc->document->createElement('add');
+                    $entry->setAttribute('value', $value);
+                    $entry->setAttribute('as', $j);
+                    $styleNode->appendChild($entry);
                 }
+            }
 
-                if ($styleNode->childNodes->count() > 0) {
-                    $node->appendChild($styleNode);
-                }
+            if ($styleNode->childNodes->count() > 0) {
+                $node->appendChild($styleNode);
             }
         }
 

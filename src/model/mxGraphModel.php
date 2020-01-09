@@ -24,6 +24,8 @@ class mxGraphModel extends mxEventSource
      * Holds the root cell, which in turn contains the cells that represent the
      * layers of the diagram as child cells. That is, the actual elements of the
      * diagram are supposed to live in the third generation of cells and below.
+     *
+     * @var mxCell | null
      */
     public $root;
 
@@ -31,6 +33,8 @@ class mxGraphModel extends mxEventSource
      * Variable: cells.
      *
      * Maps from Ids to cells.
+     *
+     * @var array<int, mxCell>
      */
     public $cells;
 
@@ -39,6 +43,8 @@ class mxGraphModel extends mxEventSource
      *
      * Specifies if edges should automatically be moved into the nearest common
      * ancestor of their terminals. Default is true.
+     *
+     * @var bool
      */
     public $maintainEdgeParent = true;
 
@@ -47,6 +53,8 @@ class mxGraphModel extends mxEventSource
      *
      * Specifies if the model should automatically create Ids for new cells.
      * Default is true.
+     *
+     * @var bool
      */
     public $createIds = true;
 
@@ -54,6 +62,8 @@ class mxGraphModel extends mxEventSource
      * Variable: nextId.
      *
      * Specifies the next Id to be created. Default is 0.
+     *
+     * @var int
      */
     public $nextId = 0;
 
@@ -64,6 +74,8 @@ class mxGraphModel extends mxEventSource
      * will increment this number and each call to <endUpdate> will decrement
      * it. When the counter reaches 0, the transaction is closed and the
      * respective events are fired. Initial value is 0.
+     *
+     * @var int
      */
     public $updateLevel = 0;
 
@@ -72,13 +84,13 @@ class mxGraphModel extends mxEventSource
      *
      * Constructs a new graph model using the specified root cell.
      *
-     * @param null|mixed $root
+     * @param mxCell $root
      *
      * @throws Exception
      */
-    public function __construct($root = null)
+    public function __construct(mxCell $root = null)
     {
-        if (isset($root)) {
+        if ($root) {
             $this->setRoot($root);
         } else {
             $this->clear();
@@ -100,7 +112,7 @@ class mxGraphModel extends mxEventSource
      *
      * Creates a new root cell with a default layer (child 0).
      */
-    public function createRoot()
+    public function createRoot(): mxCell
     {
         $root = new mxCell();
         $root->insert(new mxCell());
@@ -112,28 +124,24 @@ class mxGraphModel extends mxEventSource
      * Function: getCells.
      *
      * Returns the internal lookup table that is used to map from Ids to cells.
+     *
+     * @return array<mxCell>
      */
-    public function getCells()
+    public function getCells(): array
     {
         return $this->cells;
     }
 
     /**
-     * Function: setRoot.
+     * Function: getCell.
      *
-     * @param mixed $id
+     * @param int $id
      *
-     * @return null|mixed
+     * @return mxCell
      */
-    public function getCell($id)
+    public function getCell(int $id): ?mxCell
     {
-        $result = null;
-
-        if (null != $this->cells) {
-            $result = mxUtils::getValue($this->cells, $id);
-        }
-
-        return $result;
+        return $this->cells[$id] ?? null;
     }
 
     /**
@@ -141,7 +149,7 @@ class mxGraphModel extends mxEventSource
      *
      * Returns the root of the model.
      */
-    public function getRoot()
+    public function getRoot(): mxCell
     {
         return $this->root;
     }
@@ -158,11 +166,13 @@ class mxGraphModel extends mxEventSource
      *
      * root - <mxCell> that specifies the new root.
      *
-     * @param mixed $root
+     * @param mxCell $root
      *
      * @throws Exception
+     *
+     * @return mxCell | null
      */
-    public function setRoot($root)
+    public function setRoot(mxCell $root = null): ?mxCell
     {
         $oldRoot = $this->root;
 
@@ -171,7 +181,7 @@ class mxGraphModel extends mxEventSource
         try {
             $this->root = $root;
             $this->nextId = 0;
-            $this->cells = null;
+            $this->cells = [];
 
             $this->cellAdded($root);
         } catch (Exception $e) {
@@ -198,11 +208,11 @@ class mxGraphModel extends mxEventSource
      *
      * cell - <mxCell> to be cloned.
      *
-     * @param mixed $cell
+     * @param mxCell $cell
      *
-     * @return mixed
+     * @return mxCell
      */
-    public function cloneCell($cell)
+    public function cloneCell($cell): mxCell
     {
         $clones = $this->cloneCells([$cell], true);
 
@@ -223,23 +233,22 @@ class mxGraphModel extends mxEventSource
      * includeChildren - Boolean indicating if the cells should be cloned
      * with all descendants.
      *
-     * @param mixed $cells
-     * @param mixed $includeChildren
+     * @param array<mxCell> $cells
+     * @param bool          $includeChildren
      *
-     * @return array
+     * @return array<mxCell>
      */
-    public function cloneCells($cells, $includeChildren = true)
+    public function cloneCells($cells, $includeChildren = true): array
     {
         $mapping = [];
         $clones = [];
 
-        for ($i = 0; $i < sizeof($cells); ++$i) {
-            $cell = $cells[$i];
+        foreach ($cells as $cell) {
             $clne = $this->cloneCellImpl($cell, $mapping, $includeChildren);
-            array_push($clones, $clne);
+            $clones[] = $clne;
         }
 
-        for ($i = 0; $i < sizeof($clones); ++$i) {
+        for ($i = 0, $iMax = count($clones); $i < $iMax; ++$i) {
             $this->restoreClone($clones[$i], $cells[$i], $mapping);
         }
 
@@ -251,33 +260,34 @@ class mxGraphModel extends mxEventSource
      *
      * Inner helper method for cloning cells recursively.
      *
-     * @param mixed $cell
-     * @param mixed $mapping
-     * @param mixed $includeChildren
+     * @param mxCell                $cell
+     * @param array<string, mxCell> $mapping
+     * @param bool                  $includeChildren
      *
-     * @return mixed
+     * @return mxCell
      */
-    public function cloneCellImpl($cell, $mapping, $includeChildren)
+    public function cloneCellImpl(mxCell $cell, $mapping, $includeChildren): mxCell
     {
         $ident = mxCellPath::create($cell);
-        $clne = $mapping[$ident];
 
-        if (null == $clne) {
-            $clne = $this->cellCloned($cell);
-            $mapping[$ident] = $clne;
+        if (isset($mapping[$ident])) {
+            return $mapping[$ident];
+        }
 
-            if ($includeChildren) {
-                $childCount = $this->getChildCount($cell);
+        $clone = $this->cellCloned($cell);
+        $mapping[$ident] = $clone;
 
-                for ($i = 0; $i < $childCount; ++$i) {
-                    $child = $this->getChildAt($cell, $i);
-                    $cloneChild = $this->cloneCellImpl($child, $mapping, true);
-                    $clne->insert($cloneChild);
-                }
+        if ($includeChildren) {
+            $childCount = $this->getChildCount($cell);
+
+            for ($i = 0; $i < $childCount; ++$i) {
+                $child = $this->getChildAt($cell, $i);
+                $cloneChild = $this->cloneCellImpl($child, $mapping, true);
+                $clone->insert($cloneChild);
             }
         }
 
-        return $clne;
+        return $clone;
     }
 
     /**
@@ -286,11 +296,11 @@ class mxGraphModel extends mxEventSource
      * Hook for cloning the cell. This returns cell->copy() or
      * any possible exceptions.
      *
-     * @param mixed $cell
+     * @param mxCell $cell
      *
-     * @return mixed
+     * @return mxCell
      */
-    public function cellCloned($cell)
+    public function cellCloned($cell): mxCell
     {
         return $cell->copy();
     }
@@ -301,11 +311,11 @@ class mxGraphModel extends mxEventSource
      * Inner helper method for restoring the connections in
      * a network of cloned cells.
      *
-     * @param mixed $clne
-     * @param mixed $cell
-     * @param mixed $mapping
+     * @param mxCell                $clone
+     * @param mxCell                $cell
+     * @param array<string, mxCell> $mapping
      */
-    public function restoreClone($clne, $cell, $mapping): void
+    public function restoreClone(mxCell $clone, mxCell $cell, array $mapping): void
     {
         $source = $this->getTerminal($cell, true);
 
@@ -313,7 +323,7 @@ class mxGraphModel extends mxEventSource
             $tmp = $mapping[mxCellPath::create($source)];
 
             if (null != $tmp) {
-                $tmp->insertEdge($clne, true);
+                $tmp->insertEdge($clone, true);
             }
         }
 
@@ -323,15 +333,15 @@ class mxGraphModel extends mxEventSource
             $tmp = $mapping[mxCellPath::create($target)];
 
             if (null != $tmp) {
-                $tmp->insertEdge($clne, false);
+                $tmp->insertEdge($clone, false);
             }
         }
 
-        $childCount = $this->getChildCount($clne);
+        $childCount = $this->getChildCount($clone);
 
         for ($i = 0; $i < $childCount; ++$i) {
             $this->restoreClone(
-                $this->getChildAt($clne, $i),
+                $this->getChildAt($clone, $i),
                 $this->getChildAt($cell, $i),
                 $mapping
             );
@@ -353,7 +363,7 @@ class mxGraphModel extends mxEventSource
      *
      * @return bool
      */
-    public function isAncestor($parent, $child)
+    public function isAncestor($parent, $child): bool
     {
         while (null != $child && $child != $parent) {
             $child = $this->getParent($child);
@@ -375,7 +385,7 @@ class mxGraphModel extends mxEventSource
      *
      * @return bool
      */
-    public function contains($cell)
+    public function contains($cell): bool
     {
         return $this->isAncestor($this->root, $cell);
     }
@@ -389,15 +399,13 @@ class mxGraphModel extends mxEventSource
      *
      * cell - <mxCell> whose parent should be returned.
      *
-     * @param mixed $cell
+     * @param mxCell $cell
+     *
+     * @return mxCell
      */
-    public function getParent($cell)
+    public function getParent(mxCell $cell): ?mxCell
     {
-        if (null != $cell) {
-            return $cell->getParent();
-        }
-
-        return null;
+        return $cell->getParent();
     }
 
     /**
@@ -457,25 +465,25 @@ class mxGraphModel extends mxEventSource
      *
      * cell - <mxCell> that specifies the cell that has been added.
      *
-     * @param mixed $cell
+     * @param mxCell $cell
      */
-    public function cellAdded($cell): void
+    public function cellAdded(mxCell $cell = null): void
     {
-        if (null == $cell->getId() && $this->createIds) {
+        if (!$cell) {
+            return;
+        }
+
+        if ($this->createIds && null === $cell->getId()) {
             $cell->setId($this->createId($cell));
         }
 
-        if (null != $cell->getId()) {
+        if (null !== $cell->getId()) {
             $collision = $this->getCell($cell->getId());
 
-            if ($collision != $cell) {
-                while (null != $collision) {
+            if ($collision !== $cell) {
+                while (null !== $collision) {
                     $cell->setId($this->createId($cell));
                     $collision = $this->getCell($cell->getId());
-                }
-
-                if (null == $this->cells) {
-                    $this->cells = [];
                 }
 
                 $this->cells[$cell->getId()] = $cell;
@@ -508,7 +516,7 @@ class mxGraphModel extends mxEventSource
      *
      * @return int
      */
-    public function createId($cell)
+    public function createId($cell): int
     {
         $id = $this->nextId;
         ++$this->nextId;
@@ -522,13 +530,15 @@ class mxGraphModel extends mxEventSource
      * Updates the parent for all edges that are connected to cell or one of
      * its descendants using <updateEdgeParent>.
      *
-     * @param mixed      $cell
-     * @param null|mixed $root
+     * @param mxCell $cell
+     * @param mxCell $root
+     *
+     * @throws Exception
      */
-    public function updateEdgeParents($cell, $root = null): void
+    public function updateEdgeParents(mxCell $cell, mxCell $root = null): void
     {
         // Gets the topmost node of the hierarchy
-        $root = $root || $this->getRoot();
+        $root = $root ?? $this->getRoot();
 
         // Updates edges on children first
         $childCount = $this->getChildCount($cell);
@@ -543,7 +553,7 @@ class mxGraphModel extends mxEventSource
         $edges = [];
 
         for ($i = 0; $i < $edgeCount; ++$i) {
-            array_push($edges, $this->getEdgeAt($cell, $i));
+            $edges[] = $this->getEdgeAt($cell, $i);
         }
 
         foreach ($edges as $edge) {
@@ -630,7 +640,7 @@ class mxGraphModel extends mxEventSource
      *
      * @return null|mxPoint
      */
-    public function getOrigin($cell)
+    public function getOrigin($cell): ?mxPoint
     {
         $result = null;
 
@@ -718,7 +728,7 @@ class mxGraphModel extends mxEventSource
 
         try {
             if ($cell === $this->root) {
-                $this->setRoot(null);
+                $this->setRoot();
             } else {
                 $cell->removeFromParent();
             }
@@ -758,7 +768,7 @@ class mxGraphModel extends mxEventSource
             $cell->removeFromTerminal(false);
 
             if (null != $this->cells && null != $cell->getId()) {
-                $this->cells[$cell->getId()] = null;
+                unset($this->cells[$cell->getId()]);
             }
         }
     }
@@ -776,7 +786,7 @@ class mxGraphModel extends mxEventSource
      *
      * @return int
      */
-    public function getChildCount($cell)
+    public function getChildCount($cell): int
     {
         return (null != $cell) ? $cell->getChildCount() : 0;
     }
@@ -791,16 +801,14 @@ class mxGraphModel extends mxEventSource
      * cell - <mxCell> that represents the parent.
      * index - Integer that specifies the index of the child to be returned.
      *
-     * @param mixed $cell
-     * @param mixed $index
+     * @param mxCell $cell
+     * @param int    $index
+     *
+     * @return mxCell | null
      */
-    public function getChildAt($cell, $index)
+    public function getChildAt(mxCell $cell, int $index): ?mxCell
     {
-        if (null != $cell) {
-            return $cell->getChildAt($index);
-        }
-
-        return null;
+        return $cell->getChildAt($index);
     }
 
     /**
@@ -817,7 +825,7 @@ class mxGraphModel extends mxEventSource
      * @param mxCell $edge
      * @param bool   $source
      *
-     * @return mxCell
+     * @return mxCell | null
      */
     public function getTerminal(mxCell $edge, bool $source): ?mxCell
     {
@@ -915,13 +923,13 @@ class mxGraphModel extends mxEventSource
      *
      * cell - <mxCell> that represents the vertex.
      *
-     * @param mixed $cell
+     * @param mxCell $cell
      *
      * @return int
      */
-    public function getEdgeCount($cell)
+    public function getEdgeCount(mxCell $cell = null): int
     {
-        return (null != $cell) ? $cell->getEdgeCount() : 0;
+        return ($cell) ? $cell->getEdgeCount() : 0;
     }
 
     /**
@@ -937,6 +945,8 @@ class mxGraphModel extends mxEventSource
      *
      * @param mxCell $cell
      * @param int    $index
+     *
+     * @return null|mixed
      */
     public function getEdgeAt(mxCell $cell, int $index)
     {
@@ -989,11 +999,13 @@ class mxGraphModel extends mxEventSource
      *
      * cell - <mxCell> that represents the possible edge.
      *
-     * @param mixed $cell
+     * @param mxCell $cell
+     *
+     * @return bool
      */
-    public function isEdge($cell)
+    public function isEdge(mxCell $cell)
     {
-        return (null != $cell) ? $cell->isEdge() : null;
+        return $cell->isEdge();
     }
 
     /**
@@ -1007,13 +1019,13 @@ class mxGraphModel extends mxEventSource
      *
      * cell - <mxCell> whose connectable state should be returned.
      *
-     * @param mixed $cell
+     * @param mxCell $cell
      *
      * @return bool
      */
-    public function isConnectable($cell)
+    public function isConnectable(mxCell $cell): bool
     {
-        return (null != $cell) ? $cell->isConnectable() : false;
+        return $cell->isConnectable();
     }
 
     /**
@@ -1025,11 +1037,13 @@ class mxGraphModel extends mxEventSource
      *
      * cell - <mxCell> whose user object should be returned.
      *
-     * @param mixed $cell
+     * @param mxCell $cell
+     *
+     * @return object
      */
-    public function getValue($cell)
+    public function getValue(mxCell $cell)
     {
-        return (null != $cell) ? $cell->getValue() : null;
+        return $cell->getValue();
     }
 
     /**
@@ -1075,15 +1089,13 @@ class mxGraphModel extends mxEventSource
      *
      * cell - <mxCell> whose geometry should be returned.
      *
-     * @param mixed $cell
+     * @param mxCell $cell
+     *
+     * @return mxGeometry
      */
-    public function getGeometry($cell)
+    public function getGeometry($cell): mxGeometry
     {
-        if (null != $cell) {
-            return $cell->getGeometry();
-        }
-
-        return null;
+        return $cell->getGeometry();
     }
 
     /**
@@ -1098,14 +1110,14 @@ class mxGraphModel extends mxEventSource
      * cell - <mxCell> whose geometry should be changed.
      * geometry - <mxGeometry> that defines the new geometry.
      *
-     * @param mixed $cell
-     * @param mixed $geometry
+     * @param mxCell     $cell
+     * @param mxGeometry $geometry
      *
      * @throws Exception
      *
-     * @return mixed
+     * @return mxGeometry
      */
-    public function setGeometry($cell, $geometry)
+    public function setGeometry(mxCell $cell, mxGeometry $geometry): mxGeometry
     {
         $this->beginUpdate();
 
@@ -1130,11 +1142,13 @@ class mxGraphModel extends mxEventSource
      *
      * cell - <mxCell> whose style should be returned.
      *
-     * @param mixed $cell
+     * @param mxCell $cell
+     *
+     * @return string
      */
-    public function getStyle($cell)
+    public function getStyle(mxCell $cell): string
     {
-        return (null != $cell) ? $cell->getStyle() : null;
+        return$cell->getStyle();
     }
 
     /**
@@ -1185,7 +1199,7 @@ class mxGraphModel extends mxEventSource
      *
      * @return bool
      */
-    public function isCollapsed($cell)
+    public function isCollapsed($cell): bool
     {
         return (null != $cell) ? $cell->isCollapsed() : false;
     }
@@ -1237,7 +1251,7 @@ class mxGraphModel extends mxEventSource
      *
      * @return bool
      */
-    public function isVisible($cell)
+    public function isVisible($cell): bool
     {
         return (null != $cell) ? $cell->isVisible() : false;
     }
@@ -1336,14 +1350,14 @@ class mxGraphModel extends mxEventSource
      * cell to the target cell with the same id or the clone of the source cell
      * that was inserted into this model.
      *
-     * @param mixed $from
-     * @param mixed $to
-     * @param mixed $cloneAllEdges
-     * @param mixed $mapping
+     * @param mxCell $from
+     * @param mxCell $to
+     * @param bool   $cloneAllEdges
+     * @param mixed  $mapping
      *
      * @throws Exception
      */
-    public function mergeChildrenImpl($from, $to, $cloneAllEdges, &$mapping): void
+    public function mergeChildrenImpl(mxCell $from, mxCell $to, bool $cloneAllEdges, &$mapping): void
     {
         $this->beginUpdate();
 
@@ -1353,12 +1367,12 @@ class mxGraphModel extends mxEventSource
             for ($i = 0; $i < $childCount; ++$i) {
                 $cell = $from->getChildAt($i);
                 $id = $cell->getId();
-                $target = (isset($d) && (!$this->isEdge($cell) || !$cloneAllEdges)) ?
+                $target = (isset($id) && (!$this->isEdge($cell) || !$cloneAllEdges)) ?
                         $this->getCell($id) : null;
 
                 // Clones and adds the child if no cell exists for the id
                 if (!isset($target)) {
-                    $clone = $cell->clone();
+                    $clone = $cell->copy();
                     $clone->setId($id);
 
                     // Sets the terminals from the original cell to the clone
@@ -1410,7 +1424,7 @@ class mxGraphModel extends mxEventSource
     {
         --$this->updateLevel;
 
-        if (0 == $this->updateLevel) {
+        if (0 === $this->updateLevel) {
             $this->fireEvent(new mxEventObject(mxEvent::$GRAPH_MODEL_CHANGED));
         }
     }
@@ -1434,7 +1448,7 @@ class mxGraphModel extends mxEventSource
      *
      * @return int
      */
-    public function getDirectedEdgeCount($cell, $outgoing, $ignoredEdge = null)
+    public function getDirectedEdgeCount($cell, $outgoing, $ignoredEdge = null): int
     {
         $count = 0;
         $edgeCount = $this->getEdgeCount($cell);

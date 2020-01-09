@@ -10,6 +10,11 @@ namespace MxGraph;
 class mxGraphViewHtmlReader extends mxGraphViewImageReader
 {
     /**
+     * @var mxHtmlCanvas
+     */
+    public $canvas;
+
+    /**
      * Class: mxGraphViewHtmlReader.
      *
      * A display XML to HTML converter. This allows to create an image of a graph
@@ -31,8 +36,10 @@ class mxGraphViewHtmlReader extends mxGraphViewImageReader
      * Returns the canvas to be used for rendering.
      *
      * @param mixed $attrs
+     *
+     * @return mxGdCanvas
      */
-    public function createCanvas($attrs)
+    public function createCanvas($attrs): mxGdCanvas
     {
         return new mxHtmlCanvas($this->scale);
     }
@@ -42,10 +49,12 @@ class mxGraphViewHtmlReader extends mxGraphViewImageReader
      *
      * Creates the HTML markup for the given display XML string.
      *
-     * @param mixed      $string
-     * @param null|mixed $background
+     * @param string $string
+     * @param string $background
+     *
+     * @return string
      */
-    public static function convert($string, $background = null)
+    public static function convert(string $string, string $background = null): string
     {
         $viewReader = new mxGraphViewHtmlReader();
 
@@ -61,10 +70,12 @@ class mxGraphViewHtmlReader extends mxGraphViewImageReader
      *
      * Creates the HTML markup for the given display XML file.
      *
-     * @param mixed      $filename
-     * @param null|mixed $background
+     * @param string $filename
+     * @param string $background
+     *
+     * @return string
      */
-    public static function convertFile($filename, $background = null)
+    public static function convertFile(string $filename, string $background = null): string
     {
         $viewReader = new mxGraphViewHtmlReader();
 

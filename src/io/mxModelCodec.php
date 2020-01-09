@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace MxGraph;
 
+use DOMElement;
+
 /**
  * Copyright (c) 2006-2013, Gaudenz Alder.
  */
@@ -63,7 +65,7 @@ class mxModelCodec extends mxObjectCodec
      */
     public function decodeChild($dec, $child, &$obj): void
     {
-        if ('root' == $child->nodeName) {
+        if ('root' === $child->nodeName) {
             $this->decodeRoot($dec, $child, $obj);
         } else {
             parent::decodeChild($dec, $child, $obj);
@@ -73,9 +75,9 @@ class mxModelCodec extends mxObjectCodec
     /**
      * Override <mxObjectCodec.decodeRoot>.
      *
-     * @param mxCodec     $dec
-     * @param \DOMElement $root
-     * @param mixed       $model
+     * @param mxCodec    $dec
+     * @param DOMElement $root
+     * @param mixed      $model
      */
     public function decodeRoot($dec, $root, $model): void
     {
@@ -93,7 +95,7 @@ class mxModelCodec extends mxObjectCodec
         }
 
         // Sets the root on the model if one has been decoded
-        if (isset($rootCell)) {
+        if ($rootCell) {
             $model->setRoot($rootCell);
         }
     }

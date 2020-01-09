@@ -486,6 +486,8 @@ class mxPerimeter
      * Variable: RectanglePerimeter.
      *
      * Provides a rectangular perimeter.
+     *
+     * @var mxRectanglePerimeter
      */
     public static $RectanglePerimeter;
 
@@ -493,6 +495,8 @@ class mxPerimeter
      * Variable: EllipsePerimeter.
      *
      * Provides an elliptic perimeter.
+     *
+     * @var mxEllipsePerimeter
      */
     public static $EllipsePerimeter;
 
@@ -500,6 +504,8 @@ class mxPerimeter
      * Variable: RhombusPerimeter.
      *
      * Provides a rhombus (aka diamond) perimeter.
+     *
+     * @var mxRhombusPerimeter
      */
     public static $RhombusPerimeter;
 
@@ -508,6 +514,8 @@ class mxPerimeter
      *
      * Provides a triangle perimeter. See <RectanglePerimeter> for a
      * description of the parameters.
+     *
+     * @var mxTrianglePerimeter
      */
     public static $TrianglePerimeter;
 }

@@ -17,8 +17,10 @@ class mxEventSource
      * Variable: eventListeners
      *
      * Holds the registered listeners.
+     *
+     * @var array<string, object>
      */
-    public $eventListeners;
+    protected $eventListeners = [];
 
     /**
      * Function: addListener.
@@ -28,17 +30,12 @@ class mxEventSource
      * for. This is different from other language implementations of this
      * class.
      *
-     * @param mixed $name
-     * @param mixed $listener
+     * @param string $name
+     * @param object $listener
      */
-    public function addListener($name, $listener): void
+    public function addListener(string $name, $listener): void
     {
-        if (null == $this->eventListeners) {
-            $this->eventListeners = [];
-        }
-
-        array_push($this->eventListeners, $name);
-        array_push($this->eventListeners, $listener);
+        $this->eventListeners[$name] = $listener;
     }
 
     /**
@@ -46,18 +43,18 @@ class mxEventSource
      *
      * Fires the event for the specified name.
      *
-     * @param mixed $event
+     * @param mxEventObject $event
      */
-    public function fireEvent($event): void
+    public function fireEvent(mxEventObject $event): void
     {
-        if (null != $this->eventListeners) {
-            $name = $event->getName();
+        $name = $event->getName();
 
-            for ($i = 0; $i < sizeof($this->eventListeners); $i += 2) {
-                if ($this->eventListeners[$i] == $name) {
-                    $this->eventListeners[$i + 1]->{$name}($event);
-                }
+        foreach ($this->eventListeners as $_name => $listener) {
+            if ($_name !== $name) {
+                continue;
             }
+
+            $listener->{$name}($event);
         }
     }
 }

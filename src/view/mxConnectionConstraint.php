@@ -18,6 +18,8 @@ class mxConnectionConstraint
      * Variable: point
      *
      * <mxPoint> that specifies the fixed location of the connection point.
+     *
+     * @var mxPoint
      */
     public $point;
 
@@ -26,6 +28,8 @@ class mxConnectionConstraint
      *
      * Boolean that specifies if the point should be projected onto the perimeter
      * of the terminal.
+     *
+     * @var bool
      */
     public $perimeter;
 
@@ -42,10 +46,10 @@ class mxConnectionConstraint
      * perimeter - Optional boolean that specifies if the fixed point should be
      * projected onto the perimeter of the terminal. Default is true.
      *
-     * @param null|mixed $point
-     * @param mixed      $perimeter
+     * @param mxPoint $point
+     * @param bool    $perimeter
      */
-    public function __construct($point = null, $perimeter = true)
+    public function __construct(mxPoint $point = null, bool $perimeter = true)
     {
         $this->point = $point;
         $this->perimeter = $perimeter;

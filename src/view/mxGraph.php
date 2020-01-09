@@ -56,6 +56,8 @@ class mxGraph
      *
      * Specifies if labels should be visible. This is used in
      * <getLabel>. Default is true.
+     *
+     * @var bool
      */
     public $labelsVisible = true;
 
@@ -65,6 +67,8 @@ class mxGraph
      * <mxEdgeStyle> to be used for loops. This is a fallback for
      * loops if the <mxConstants.STYLE_LOOP> is undefined. Default is
      * <mxEdgeStyle.Loop>.
+     *
+     * @var string
      */
     public $defaultLoopStyle = 'mxEdgeStyle.Loop';
 
@@ -85,6 +89,8 @@ class mxGraph
      *
      * @param mxGraphModel $model
      * @param mxStylesheet $stylesheet
+     *
+     * @throws Exception
      */
     public function __construct($model = null, $stylesheet = null)
     {
@@ -152,8 +158,10 @@ class mxGraph
      * Returns the first child child of <mxGraphModel.root>. The value returned
      * by this function should be used as the parent for new cells (aka default
      * layer).
+     *
+     * @return mxCell
      */
-    public function getDefaultParent()
+    public function getDefaultParent(): mxCell
     {
         $model = $this->model;
 
@@ -171,11 +179,19 @@ class mxGraph
      *
      * @return string
      */
-    public function convertValueToString($cell): ?string
+    public function convertValueToString(mxCell $cell): ?string
     {
-        $result = $this->model->getValue($cell);
+        $value = $this->model->getValue($cell);
 
-        return $result ?? '';
+        if (mxUtils::isNode($value)) {
+            return $value->nodeName;
+        }
+
+        if (method_exists($value, 'toString')) {
+            return $value->toString();
+        }
+
+        return '';
     }
 
     /**
@@ -238,11 +254,11 @@ class mxGraph
      *
      * edge - <mxCellState> that represents the edge.
      *
-     * @param mxCell $edge
+     * @param mxCellState $edge
      *
      * @return null|bool|mixed
      */
-    public function isOrthogonal(mxCell $edge)
+    public function isOrthogonal(mxCellState $edge)
     {
         if (isset($edge->style[mxConstants::$STYLE_ORTHOGONAL])) {
             return mxUtils::getValue($edge->style, mxConstants::$STYLE_ORTHOGONAL);
@@ -464,6 +480,8 @@ class mxGraph
      * Function: getImageBundles.
      *
      * Returns the <imageBundles>.
+     *
+     * @return mxImageBundle[]
      */
     public function getImageBundles(): array
     {
@@ -914,13 +932,13 @@ class mxGraph
      * should be counted for a tree root. If false then outgoing edges will be
      * counted. Default is false.
      *
-     * @param mixed $parent
-     * @param mixed $isolate
-     * @param mixed $invert
+     * @param mxCell $parent
+     * @param mixed  $isolate
+     * @param mixed  $invert
      *
-     * @return array
+     * @return mxCell[]
      */
-    public function findTreeRoots($parent = null, $isolate = false, $invert = false): array
+    public function findTreeRoots(mxCell $parent = null, $isolate = false, $invert = false): array
     {
         $roots = [];
 

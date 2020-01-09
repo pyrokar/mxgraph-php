@@ -10,21 +10,11 @@ namespace MxGraph;
 class mxCell
 {
     /**
-     * Class: mxCell.
-     *
-     * Cells are the elements of the graph model. They represent the state
-     * of the groups, vertices and edges in a graph.
-     *
-     * Variable: id
-     *
-     * Holds the Id. Default is null.
-     */
-    public $id;
-
-    /**
      * Variable: value.
      *
      * Holds the user object. Default is null.
+     *
+     * @var object | null
      */
     public $value;
 
@@ -32,6 +22,8 @@ class mxCell
      * Variable: geometry.
      *
      * Holds the <mxGeometry>. Default is null.
+     *
+     * @var mxGeometry
      */
     public $geometry;
 
@@ -39,7 +31,9 @@ class mxCell
      * Variable: style.
      *
      * Holds the style as a string of the form [(stylename|key=value);].
-     * Default is null.
+     * Default is null
+     *
+     * @var string
      */
     public $style;
 
@@ -47,6 +41,8 @@ class mxCell
      * Variable: vertex.
      *
      * Specifies whether the cell is a vertex. Default is false.
+     *
+     * @var bool
      */
     public $vertex = false;
 
@@ -54,6 +50,8 @@ class mxCell
      * Variable: edge.
      *
      * Specifies whether the cell is an edge. Default is false.
+     *
+     * @var bool
      */
     public $edge = false;
 
@@ -61,6 +59,8 @@ class mxCell
      * Variable: connectable.
      *
      * Specifies whether the cell is connectable. Default is true.
+     *
+     * @var bool
      */
     public $connectable = true;
 
@@ -68,6 +68,8 @@ class mxCell
      * Variable: visible.
      *
      * Specifies whether the cell is visible. Default is true.
+     *
+     * @var bool
      */
     public $visible = true;
 
@@ -75,6 +77,8 @@ class mxCell
      * Variable: collapsed.
      *
      * Specifies whether the cell is collapsed. Default is false.
+     *
+     * @var bool
      */
     public $collapsed = false;
 
@@ -122,6 +126,19 @@ class mxCell
      * @var mxCell[]
      */
     public $edges = []; // transient
+    /**
+     * Class: mxCell.
+     *
+     * Cells are the elements of the graph model. They represent the state
+     * of the groups, vertices and edges in a graph.
+     *
+     * Variable: id
+     *
+     * Holds the Id. Default is null.
+     *
+     * @var int
+     */
+    protected $id;
 
     /**
      * Constructor: mxCell.
@@ -151,7 +168,7 @@ class mxCell
      *
      * Returns the Id of the cell as a string.
      */
-    public function getId()
+    public function getId(): ?int
     {
         return $this->id;
     }
@@ -161,9 +178,9 @@ class mxCell
      *
      * Sets the Id of the cell to the given string.
      *
-     * @param mixed $id
+     * @param int $id
      */
-    public function setId($id): void
+    public function setId(int $id): void
     {
         $this->id = $id;
     }
@@ -173,8 +190,10 @@ class mxCell
      *
      * Returns the user object of the cell. The user
      * object is stored in <value>.
+     *
+     * @return object | null
      */
-    public function getValue()
+    public function getValue(): ?object
     {
         return $this->value;
     }
@@ -197,7 +216,7 @@ class mxCell
      *
      * Returns the <mxGeometry> that describes the <geometry>.
      */
-    public function getGeometry()
+    public function getGeometry(): mxGeometry
     {
         return $this->geometry;
     }
@@ -219,7 +238,7 @@ class mxCell
      *
      * Returns a string that describes the <style>.
      */
-    public function getStyle()
+    public function getStyle(): string
     {
         return $this->style;
     }
@@ -241,7 +260,7 @@ class mxCell
      *
      * Returns true if the cell is a vertex.
      */
-    public function isVertex()
+    public function isVertex(): bool
     {
         return $this->vertex;
     }
@@ -268,7 +287,7 @@ class mxCell
      *
      * Returns true if the cell is an edge.
      */
-    public function isEdge()
+    public function isEdge(): bool
     {
         return $this->edge;
     }
@@ -295,7 +314,7 @@ class mxCell
      *
      * Returns true if the cell is connectable.
      */
-    public function isConnectable()
+    public function isConnectable(): bool
     {
         return $this->connectable;
     }
@@ -321,7 +340,7 @@ class mxCell
      *
      * Returns true if the cell is visibile.
      */
-    public function isVisible()
+    public function isVisible(): bool
     {
         return $this->visible;
     }
@@ -347,7 +366,7 @@ class mxCell
      *
      * Returns true if the cell is collapsed.
      */
-    public function isCollapsed()
+    public function isCollapsed(): bool
     {
         return $this->collapsed;
     }
@@ -408,7 +427,7 @@ class mxCell
      *
      * @return null|mxCell
      */
-    public function getTerminal(bool $source)
+    public function getTerminal(bool $source): ?mxCell
     {
         if ($source) {
             return $this->source;
@@ -467,7 +486,7 @@ class mxCell
      *
      * @return int
      */
-    public function getIndex($child)
+    public function getIndex($child): int
     {
         return mxUtils::indexOf($this->children, $child);
     }
@@ -597,7 +616,7 @@ class mxCell
      *
      * @return int
      */
-    public function getEdgeIndex($edge)
+    public function getEdgeIndex($edge): int
     {
         return mxUtils::indexOf($this->edges, $edge);
     }
@@ -611,11 +630,11 @@ class mxCell
      *
      * index - Integer that specifies the index of the edge to be returned.
      *
-     * @param mixed $index
+     * @param int $index
      *
-     * @return null|mixed
+     * @return mxCell
      */
-    public function getEdgeAt($index)
+    public function getEdgeAt(int $index): mxCell
     {
         return $this->edges[$index];
     }
@@ -742,7 +761,7 @@ class mxCell
         $userObject = $this->getValue();
 
         if (is_object($userObject) &&
-            XML_ELEMENT_NODE == $userObject->nodeType) {
+            XML_ELEMENT_NODE === $userObject->nodeType) {
             $userObject->setAttribute($key, $value);
         }
     }
@@ -752,8 +771,10 @@ class mxCell
      *
      * Returns a clone of the cell. Uses <cloneValue> to clone
      * the user object.
+     *
+     * @return mxCell
      */
-    public function copy()
+    public function copy(): mxCell
     {
         $clone = new mxCell($this->copyValue(), null, $this->style);
         $clone->vertex = $this->vertex;
@@ -774,15 +795,15 @@ class mxCell
      * Function: copyValue.
      *
      * Returns a clone of the cell's user object.
+     *
+     * @return object
      */
-    public function copyValue()
+    public function copyValue(): object
     {
         $value = $this->getValue();
 
-        if (isset($value)) {
-            if (method_exists($value, 'cloneNode')) {
-                $value = $value->cloneNode(true);
-            }
+        if ($value && method_exists($value, 'cloneNode')) {
+            $value = $value->cloneNode(true);
         }
 
         return $value;

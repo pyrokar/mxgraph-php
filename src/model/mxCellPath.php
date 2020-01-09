@@ -17,6 +17,8 @@ class mxCellPath
      * Variable: codecs
      *
      * Maps from constructor names to codecs.
+     *
+     * @var string
      */
     public static $PATH_SEPARATOR = '.';
 
@@ -61,13 +63,13 @@ class mxCellPath
      *
      * path - Path whose parent path should be returned.
      *
-     * @param mixed $path
+     * @param string $path
      *
      * @return null|false|string
      */
-    public static function getParentPath($path)
+    public static function getParentPath(string $path = '')
     {
-        if (null != $path && strlen($path) > 0) {
+        if ('' !== $path) {
             $index = strrpos($path, self::$PATH_SEPARATOR);
 
             if (false === $index) {
@@ -91,17 +93,17 @@ class mxCellPath
      * root - Root cell of the path to be resolved.
      * path - String that defines the path.
      *
-     * @param mixed $root
-     * @param mixed $path
+     * @param mxCell $root
+     * @param string $path
      *
-     * @return mixed
+     * @return mxCell
      */
-    public static function resolve($root, $path)
+    public static function resolve(mxCell $root, string $path): mxCell
     {
         $parent = $root;
         $tokens = explode(self::$PATH_SEPARATOR, $path);
 
-        for ($i = 0; $i < sizeof($tokens); ++$i) {
+        foreach ($tokens as $i => $iValue) {
             $parent = $parent->getChildAt($tokens[$i]);
         }
 

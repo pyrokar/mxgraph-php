@@ -26,6 +26,8 @@ class mxStylesheet
      * Function: styles
      *
      * Maps from names to styles.
+     *
+     * @var array<string, array<string, string>>
      */
     public $styles = [];
 
@@ -44,8 +46,10 @@ class mxStylesheet
      * Function: createDefaultVertexStyle.
      *
      * Creates and returns the default vertex style.
+     *
+     * @return array<string, string>
      */
-    public function createDefaultVertexStyle()
+    public function createDefaultVertexStyle(): array
     {
         $style = [];
 
@@ -64,8 +68,10 @@ class mxStylesheet
      * Function: createDefaultEdgeStyle.
      *
      * Creates and returns the default edge style.
+     *
+     * @return array<string, string>
      */
-    public function createDefaultEdgeStyle()
+    public function createDefaultEdgeStyle(): array
     {
         $style = [];
 
@@ -96,9 +102,9 @@ class mxStylesheet
      *
      * Sets the default style for edges.
      *
-     * @param mixed $style
+     * @param array<string, string> $style
      */
-    public function putDefaultEdgeStyle($style): void
+    public function putDefaultEdgeStyle(array $style): void
     {
         $this->putCellStyle('defaultEdge', $style);
     }
@@ -107,8 +113,10 @@ class mxStylesheet
      * Function: getDefaultVertexStyle.
      *
      * Returns the default style for vertices.
+     *
+     * @return array<string, string>
      */
-    public function getDefaultVertexStyle()
+    public function getDefaultVertexStyle(): array
     {
         return $this->styles['defaultVertex'];
     }
@@ -117,8 +125,10 @@ class mxStylesheet
      * Function: getDefaultEdgeStyle.
      *
      * Sets the default style for edges.
+     *
+     * @return array<string, string>
      */
-    public function getDefaultEdgeStyle()
+    public function getDefaultEdgeStyle(): array
     {
         return $this->styles['defaultEdge'];
     }
@@ -159,10 +169,10 @@ class mxStylesheet
      * name - Name for the style to be stored.
      * style - Key, value pairs that define the style.
      *
-     * @param mixed $name
-     * @param mixed $style
+     * @param string                $name
+     * @param array<string, string> $style
      */
-    public function putCellStyle($name, $style): void
+    public function putCellStyle(string $name, array $style): void
     {
         $this->styles[$name] = $style;
     }
@@ -179,45 +189,49 @@ class mxStylesheet
      * style.
      * defaultStyle - Default style to be returned if no style can be found.
      *
-     * @param string     $name
-     * @param null|mixed $defaultStyle
+     * @param string                $name
+     * @param array<string, string> $defaultStyle
      *
      * @return null|array|mixed
      */
-    public function getCellStyle(string $name, $defaultStyle = null)
+    public function getCellStyle(string $name, array $defaultStyle = null)
     {
         $style = $defaultStyle;
 
-        if ($name && '' !== $name) {
-            $pairs = explode(';', $name);
+        if ('' === $name) {
+            return $style;
+        }
 
-            if (count($pairs)) {
-                if ($style && ';' !== $name[0]) {
-                    $style = array_slice($style, 0);
+        $pairs = explode(';', $name);
+
+        if (0 === count($pairs)) {
+            return $style;
+        }
+
+        if ($style && ';' !== $name[0]) {
+            $style = array_slice($style, 0);
+        } else {
+            $style = [];
+        }
+
+        foreach ($pairs as $iValue) {
+            $tmp = $iValue;
+            $pos = strpos($iValue, '=');
+
+            if (false !== $pos) {
+                $key = substr($tmp, 0, $pos);
+                $value = substr($tmp, $pos + 1);
+
+                if ($value === mxConstants::$NONE) {
+                    unset($style[$key]);
                 } else {
-                    $style = [];
+                    $style[$key] = $value;
                 }
+            } elseif (isset($this->styles[$tmp])) {
+                $tmpStyle = $this->styles[$tmp];
 
-                foreach ($pairs as $iValue) {
-                    $tmp = $iValue;
-                    $pos = strpos($iValue, '=');
-
-                    if (false !== $pos) {
-                        $key = substr($tmp, 0, $pos);
-                        $value = substr($tmp, $pos + 1);
-
-                        if ($value === mxConstants::$NONE) {
-                            unset($style[$key]);
-                        } else {
-                            $style[$key] = $value;
-                        }
-                    } elseif (isset($this->styles[$tmp])) {
-                        $tmpStyle = $this->styles[$tmp];
-
-                        foreach ($tmpStyle as $key => $value) {
-                            $style[$key] = $value;
-                        }
-                    }
+                foreach ($tmpStyle as $key => $value) {
+                    $style[$key] = $value;
                 }
             }
         }

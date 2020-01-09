@@ -42,6 +42,8 @@ class mxImageBundle
      * Variable: images
      *
      * Maps from keys to images.
+     *
+     * @var array<string, string>
      */
     public $images = [];
 
@@ -58,8 +60,10 @@ class mxImageBundle
      * Function: getImages.
      *
      * Returns the <images>.
+     *
+     * @return array<string, string>
      */
-    public function getImages()
+    public function getImages(): array
     {
         return $this->images;
     }
@@ -69,10 +73,10 @@ class mxImageBundle
      *
      * Adds the specified entry to the map.
      *
-     * @param mixed $key
-     * @param mixed $value
+     * @param string $key
+     * @param string $value
      */
-    public function putImage($key, $value): void
+    public function putImage(string $key, string $value): void
     {
         $this->images[$key] = $value;
     }
@@ -82,10 +86,12 @@ class mxImageBundle
      *
      * Returns the value for the given key.
      *
-     * @param mixed $key
+     * @param string $key
+     *
+     * @return string
      */
-    public function getImage($key)
+    public function getImage($key): ?string
     {
-        return (array_key_exists($key, $this->images)) ? $this->images[$key] : null;
+        return $this->images[$key] ?? null;
     }
 }

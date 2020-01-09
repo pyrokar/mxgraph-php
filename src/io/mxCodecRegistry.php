@@ -19,6 +19,8 @@ class mxCodecRegistry
      * Variable: codecs
      *
      * Maps from constructor names to codecs.
+     *
+     * @var array<string, mxObjectCodec>
      */
     public static $codecs = [];
 
@@ -26,6 +28,8 @@ class mxCodecRegistry
      * Variable: aliases.
      *
      * Maps from classnames to codecnames.
+     *
+     * @var array<string, string>
      */
     public static $aliases = [];
 
@@ -40,21 +44,19 @@ class mxCodecRegistry
      *
      * codec - <mxObjectCodec> to be registered.
      *
-     * @param mixed $codec
+     * @param mxObjectCodec $codec
      *
      * @return mixed
      */
-    public static function register($codec)
+    public static function register(mxObjectCodec $codec)
     {
-        if (isset($codec)) {
-            $name = $codec->getName();
-            self::$codecs[$name] = $codec;
+        $name = $codec->getName();
+        self::$codecs[$name] = $codec;
 
-            $classname = self::getName($codec->template);
+        $classname = self::getName($codec->template);
 
-            if ($classname !== $name) {
-                self::addAlias($classname, $name);
-            }
+        if ($classname !== $name) {
+            self::addAlias($classname, $name);
         }
 
         return $codec;

@@ -34,13 +34,15 @@ interface mxEdgeStyleFunction
      * result - Array of <mxPoints> that represent the actual points of the
      * edge.
      *
-     * @param mixed $state
-     * @param mixed $source
-     * @param mixed $target
-     * @param mixed $points
-     * @param mixed $result
+     * @param mxCellState $state
+     * @param mxCellState $source
+     * @param mxCellState $target
+     * @param mxPoint[]   $points
+     * @param mxPoint[]   $result
+     *
+     * @return void
      */
-    public function apply($state, $source, $target, $points, &$result);
+    public function apply(mxCellState $state, mxCellState $source, mxCellState $target, array $points, array &$result): void;
 }
 
 /**
@@ -122,7 +124,7 @@ class mxEntityRelation implements mxEdgeStyleFunction
 
             $dx = ($isSourceLeft) ? -$seg : $seg;
             $dep = new mxPoint($x0 + $dx, $y0);
-            array_push($result, $dep);
+            $result[] = $dep;
 
             $dx = ($isTargetLeft) ? -$seg : $seg;
             $arr = new mxPoint($xe + $dx, $ye);
@@ -132,15 +134,15 @@ class mxEntityRelation implements mxEdgeStyleFunction
                 $x = ($isSourceLeft) ?
                     min($x0, $xe) - $segment :
                     max($x0, $xe) + $segment;
-                array_push($result, new mxPoint($x, $y0));
-                array_push($result, new mxPoint($x, $ye));
+                $result[] = new mxPoint($x, $y0);
+                $result[] = new mxPoint($x, $ye);
             } elseif (($dep->x < $arr->x) == $isSourceLeft) {
                 $midY = $y0 + ($ye - $y0) / 2;
-                array_push($result, new mxPoint($dep->x, $midY));
-                array_push($result, new mxPoint($arr->x, $midY));
+                $result[] = new mxPoint($dep->x, $midY);
+                $result[] = new mxPoint($arr->x, $midY);
             }
 
-            array_push($result, $arr);
+            $result[] = $arr;
         }
     }
 }
@@ -224,8 +226,8 @@ class mxLoop implements mxEdgeStyleFunction
                 $dy = 0;
             }
 
-            array_push($result, new mxPoint($x - $dx, $y - $dy));
-            array_push($result, new mxPoint($x + $dx, $y + $dy));
+            $result[] = new mxPoint($x - $dx, $y - $dy);
+            $result[] = new mxPoint($x + $dx, $y + $dy);
         }
     }
 }
@@ -364,22 +366,22 @@ class mxSideToSide implements mxEdgeStyleFunction
 
             if (!mxUtils::contains($target, $x, $y1) &&
                 !mxUtils::contains($source, $x, $y1)) {
-                array_push($result, new mxPoint($x, $y1));
+                $result[] = new mxPoint($x, $y1);
             }
 
             if (!mxUtils::contains($target, $x, $y2) &&
                 !mxUtils::contains($source, $x, $y2)) {
-                array_push($result, new mxPoint($x, $y2));
+                $result[] = new mxPoint($x, $y2);
             }
 
             if (1 == sizeof($result)) {
                 if (isset($pt)) {
-                    array_push($result, new mxPoint($x, $pt->y));
+                    $result[] = new mxPoint($x, $pt->y);
                 } else {
                     $t = max($source->y, $target->y);
                     $b = min($source->y + $source->height, $target->y + $target->height);
 
-                    array_push($result, new mxPoint($x, $t + ($b - $t) / 2));
+                    $result[] = new mxPoint($x, $t + ($b - $t) / 2);
                 }
             }
         }
@@ -441,7 +443,7 @@ class mxTopToBottom implements mxEdgeStyleFunction
 
             if (!mxUtils::contains($target, $x, $y) &&
                 !mxUtils::contains($source, $x, $y)) {
-                array_push($result, new mxPoint($x, $y));
+                $result[] = new mxPoint($x, $y);
             }
 
             if (null != $pt &&
@@ -454,17 +456,17 @@ class mxTopToBottom implements mxEdgeStyleFunction
 
             if (!mxUtils::contains($target, $x, $y) &&
                 !mxUtils::contains($source, $x, $y)) {
-                array_push($result, new mxPoint($x, $y));
+                $result[] = new mxPoint($x, $y);
             }
 
             if (1 == sizeof($result)) {
                 if (null == $pt) {
-                    array_push($result, new mxPoint($x, $y));
+                    $result[] = new mxPoint($x, $y);
                 } else {
                     $l = max($source->x, $target->x);
                     $r = min($source->x + $source->width, $target->x + $target->width);
 
-                    array_push($result, new mxPoint($r + ($r - $l) / 2, $y));
+                    $result[] = new mxPoint($r + ($r - $l) / 2, $y);
                 }
             }
         }
@@ -484,6 +486,8 @@ class mxEdgeStyle
      *
      * Provides an entity relation style for edges (as used in database
      * schema diagrams).
+     *
+     * @var mxEntityRelation
      */
     public static $EntityRelation;
 
@@ -491,6 +495,8 @@ class mxEdgeStyle
      * Variable: Loop.
      *
      * Provides a self-reference, aka. loop.
+     *
+     * @var mxLoop
      */
     public static $Loop;
 
@@ -498,6 +504,8 @@ class mxEdgeStyle
      * Variable: ElbowConnector.
      *
      * Provides an elbow connector.
+     *
+     * @var mxElbowConnector
      */
     public static $ElbowConnector;
 
@@ -505,6 +513,8 @@ class mxEdgeStyle
      * Variable: SideToSide.
      *
      * Provides a side to side connector.
+     *
+     * @var mxSideToSide
      */
     public static $SideToSide;
 
@@ -512,6 +522,8 @@ class mxEdgeStyle
      * Variable: TopToBottom.
      *
      * Provides a top to bottom connector.
+     *
+     * @var mxTopToBottom
      */
     public static $TopToBottom;
 }

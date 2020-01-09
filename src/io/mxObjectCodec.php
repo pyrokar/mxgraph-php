@@ -27,6 +27,8 @@ class mxObjectCodec
      * Variable: template
      *
      * Holds the template object associated with this codec.
+     *
+     * @var object | array<string, mixed>
      */
     public $template;
 
@@ -35,8 +37,10 @@ class mxObjectCodec
      *
      * Array containing the variable names that should be
      * ignored by the codec.
+     *
+     * @var array<string>
      */
-    public $exclude;
+    public $exclude = [];
 
     /**
      * Variable: idrefs.
@@ -44,6 +48,8 @@ class mxObjectCodec
      * Array containing the variable names that should be
      * turned into or converted from references. See
      * <mxCodec.getId> and <mxCodec.getObject>.
+     *
+     * @var array<string>
      */
     public $idrefs;
 
@@ -51,6 +57,8 @@ class mxObjectCodec
      * Variable: mapping.
      *
      * Maps from from fieldnames to XML attribute names.
+     *
+     * @var array<string, string>
      */
     public $mapping;
 
@@ -58,6 +66,8 @@ class mxObjectCodec
      * Variable: reverse.
      *
      * Maps from from XML attribute names to fieldnames.
+     *
+     * @var array<string, string>
      */
     public $reverse;
 
@@ -79,16 +89,16 @@ class mxObjectCodec
      * references.
      * mapping - Optional mapping from field- to attributenames.
      *
-     * @param mixed $template
-     * @param mixed $exclude
-     * @param mixed $idrefs
-     * @param mixed $mapping
+     * @param object | array<string, mixed> $template
+     * @param array<string>                 $exclude
+     * @param array<string>                 $idrefs
+     * @param array<string, string>         $mapping
      */
     public function __construct(
         $template,
-        $exclude = [],
-        $idrefs = [],
-        $mapping = []
+        array $exclude = [],
+        array $idrefs = [],
+        array $mapping = []
     ) {
         $this->template = $template;
 
@@ -117,8 +127,10 @@ class mxObjectCodec
      * Function: cloneTemplate.
      *
      * Creates a new instance of the template for this codec.
+     *
+     * @return object | array<string, mixed>
      */
-    public function cloneTemplate(): array
+    public function cloneTemplate()
     {
         if (is_array($this->template)) {
             return [];
@@ -272,12 +284,12 @@ class mxObjectCodec
      * enc - <mxCodec> that controls the encoding process.
      * obj - Object to be encoded.
      *
-     * @param mixed $enc
-     * @param mixed $obj
+     * @param mxCodec $enc
+     * @param mixed   $obj
      *
      * @return mixed
      */
-    public function encode($enc, $obj)
+    public function encode(mxCodec $enc, $obj)
     {
         $node = $enc->document->createElement($this->getName());
 
@@ -367,7 +379,7 @@ class mxObjectCodec
             }
 
             $defaults = (is_object($this->template)) ? get_object_vars($this->template) : null;
-            $defaultValue = (isset($defaults[$name])) ? $defaults[$name] : null;
+            $defaultValue = $defaults[$name] ?? null;
 
             // Checks if the value is a named default value
             if (!isset($name) || $enc->encodeDefaults || $defaultValue !== $value) {
@@ -765,11 +777,13 @@ class mxObjectCodec
      * required to override this to return the correct collection instance
      * based on the encoded child.
      *
-     * @param mixed $obj
-     * @param mixed $fieldname
-     * @param mixed $child
+     * @param mixed  $obj
+     * @param string $fieldname
+     * @param mixed  $child
+     *
+     * @return object | array<string, mixed> | null
      */
-    public function getFieldTemplate(&$obj, $fieldname, $child)
+    public function getFieldTemplate(&$obj, string $fieldname, $child)
     {
         $template = (is_object($obj)) ? $obj->{$fieldname} : null;
 

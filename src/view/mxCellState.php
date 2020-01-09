@@ -17,6 +17,8 @@ class mxCellState extends mxRectangle
      * Variable: view
      *
      * Reference to the enclosing <mxGraphView>.
+     *
+     * @var mxGraphView
      */
     public $view;
 
@@ -24,6 +26,8 @@ class mxCellState extends mxRectangle
      * Variable: cell.
      *
      * Reference to the <mxCell> that is represented by this state.
+     *
+     * @var mxCell
      */
     public $cell;
 
@@ -32,6 +36,8 @@ class mxCellState extends mxRectangle
      *
      * Contains an array of key, value pairs that represent the style of the
      * cell.
+     *
+     * @var array<string, string>
      */
     public $style;
 
@@ -39,6 +45,8 @@ class mxCellState extends mxRectangle
      * Variable: invalid.
      *
      * Specifies if the state is invalid. Default is true.
+     *
+     * @var bool
      */
     public $invalid = true;
 
@@ -47,6 +55,8 @@ class mxCellState extends mxRectangle
      *
      * <mxPoint> that holds the origin for all child cells. Default is a new
      * empty <mxPoint>.
+     *
+     * @var mxPoint
      */
     public $origin;
 
@@ -55,8 +65,10 @@ class mxCellState extends mxRectangle
      *
      * Holds an array of <mxPoints> that represent the absolute points of an
      * edge.
+     *
+     * @var mxPoint[]
      */
-    public $absolutePoints;
+    public $absolutePoints = [];
 
     /**
      * Variable: absoluteOffset.
@@ -64,6 +76,8 @@ class mxCellState extends mxRectangle
      * <mxPoint> that holds the absolute offset. For edges, this is the
      * absolute coordinates of the label position. For vertices, this is the
      * offset of the label relative to the top, left corner of the vertex.
+     *
+     * @var mxPoint
      */
     public $absoluteOffset;
 
@@ -71,6 +85,8 @@ class mxCellState extends mxRectangle
      * Variable: terminalDistance.
      *
      * Caches the distance between the end points for an edge.
+     *
+     * @var float
      */
     public $terminalDistance;
 
@@ -78,6 +94,8 @@ class mxCellState extends mxRectangle
      * Variable: length.
      *
      * Caches the length of an edge.
+     *
+     * @var float
      */
     public $length;
 
@@ -86,6 +104,8 @@ class mxCellState extends mxRectangle
      *
      * Array of numbers that represent the cached length of each segment of the
      * edge.
+     *
+     * @var float[]
      */
     public $segments;
 
@@ -93,6 +113,8 @@ class mxCellState extends mxRectangle
      * Variable: labelBounds.
      *
      * Holds the rectangle which contains the label.
+     *
+     * @var mxRectangle
      */
     public $labelBounds;
 
@@ -100,6 +122,8 @@ class mxCellState extends mxRectangle
      * Variable: boundingBox.
      *
      * Holds the largest rectangle which contains all rendering for this cell.
+     *
+     * @var mxRectangle
      */
     public $boundingBox;
 
@@ -115,11 +139,11 @@ class mxCellState extends mxRectangle
      * cell - <mxCell> that this state represents.
      * style - Array of key, value pairs that constitute the style.
      *
-     * @param null|mixed $view
-     * @param null|mixed $cell
-     * @param null|mixed $style
+     * @param mxGraphView           $view
+     * @param mxCell                $cell
+     * @param array<string, string> $style
      */
-    public function __construct($view = null, $cell = null, $style = null)
+    public function __construct(mxGraphView $view = null, mxCell $cell = null, array $style = null)
     {
         $this->view = $view;
         $this->cell = $cell;
@@ -136,12 +160,14 @@ class mxCellState extends mxRectangle
      * cell.
      *
      * @param mixed $border
+     *
+     * @return mxRectangle
      */
-    public function getPerimeterBounds($border = 0)
+    public function getPerimeterBounds($border = 0): mxRectangle
     {
         $bounds = new mxRectangle($this->x, $this->y, $this->width, $this->height);
 
-        if (0 != $border) {
+        if (0 !== $border) {
             $bounds->grow($border);
         }
 
@@ -154,18 +180,16 @@ class mxCellState extends mxRectangle
      * Returns a copy of this state where all members are deeply cloned
      * except the view and cell references, which are copied with no
      * cloning to the new instance.
+     *
+     * @return self
      */
-    public function copy()
+    public function copy(): self
     {
         $clone = new mxCellState($this->view, $this->cell, $this->style);
 
         // Clones the absolute points
-        if (null != $this->absolutePoints) {
-            $clone->absolutePoints = [];
-
-            for ($i = 0; $i < sizeof($this->absolutePoints); ++$i) {
-                array_push($clone->absolutePoints, $this->absolutePoints[$i]->copy());
-            }
+        foreach ($this->absolutePoints as $absolutePoint) {
+            $clone->absolutePoints[] = $absolutePoint->copy();
         }
 
         if (null != $this->origin) {

@@ -51,9 +51,11 @@ class mxCellCodec extends mxObjectCodec
      */
     public function __construct($template)
     {
-        parent::__construct($template, ['children', 'edges', 'states',
-            'overlay', 'mxTransient', ], ['parent',
-                'source', 'target', ]);
+        parent::__construct(
+            $template,
+            ['children', 'edges', 'states', 'overlay', 'mxTransient'],
+            ['parent', 'source', 'target']
+        );
     }
 
     /**
@@ -63,8 +65,10 @@ class mxCellCodec extends mxObjectCodec
      * @param mixed $attr
      * @param mixed $value
      * @param mixed $isWrite
+     *
+     * @return bool
      */
-    public function isExcluded($obj, $attr, $value, $isWrite)
+    public function isExcluded($obj, $attr, $value, $isWrite): bool
     {
         return parent::isExcluded($obj, $attr, $value, $isWrite) ||
                 ($isWrite && 'value' == $attr && is_object($value) &&
@@ -77,10 +81,12 @@ class mxCellCodec extends mxObjectCodec
      * @param mixed $enc
      * @param mixed $obj
      * @param mixed $node
+     *
+     * @return mixed
      */
     public function afterEncode($enc, $obj, $node)
     {
-        if (is_object($obj->value) && 'DOMElement' == get_class($obj->value)) {
+        if (is_object($obj->value) && $obj->value instanceof \DOMElement) {
             // Wraps the graphical annotation up in the
             // user object (inversion) by putting the
             // result of the default encoding into
@@ -108,13 +114,15 @@ class mxCellCodec extends mxObjectCodec
      * @param mixed $dec
      * @param mixed $node
      * @param mixed $obj
+     *
+     * @return null|mixed
      */
     public function beforeDecode($dec, $node, &$obj)
     {
         $inner = $node;
         $classname = $this->getName();
 
-        if ($node->nodeName != $classname) {
+        if ($node->nodeName !== $classname) {
             // Passes the inner graphical annotation node to the
             // object codec for further processing of the cell.
             $tmp = $node->getElementsByTagName($classname)->item(0);
@@ -128,7 +136,7 @@ class mxCellCodec extends mxObjectCodec
                 while (isset($tmp2) && XML_TEXT_NODE == $tmp2->nodeType) {
                     $tmp3 = $tmp2->previousSibling;
 
-                    if (0 == strlen(trim($tmp2->textContent))) {
+                    if ('' === trim($tmp2->textContent)) {
                         $tmp2->parentNode->removeChild($tmp2);
                     }
 
@@ -141,7 +149,7 @@ class mxCellCodec extends mxObjectCodec
                 while (isset($tmp2) && XML_TEXT_NODE == $tmp2->nodeType) {
                     $tmp3 = $tmp2->previousSibling;
 
-                    if (0 == strlen(trim($tmp2->textContent))) {
+                    if ('' === trim($tmp2->textContent)) {
                         $tmp2->parentNode->removeChild($tmp2);
                     }
 
@@ -157,7 +165,7 @@ class mxCellCodec extends mxObjectCodec
             $obj->value = $node->cloneNode(true);
             $id = $obj->value->getAttribute('id');
 
-            if (strlen($id) > 0) {
+            if ('' !== $id) {
                 $obj->setId($id);
                 $obj->value->removeAttribute('id');
             }
@@ -169,13 +177,12 @@ class mxCellCodec extends mxObjectCodec
         // in order to use the correct encoder (this)
         // for the known references to cells (all).
         if (isset($inner)) {
-            for ($i = 0; $i < sizeof($this->idrefs); ++$i) {
-                $attr = $this->idrefs[$i];
+            foreach ($this->idrefs as $attr) {
                 $ref = $inner->getAttribute($attr);
 
-                if (strlen($ref) > 0) {
+                if ('' !== $ref) {
                     $inner->removeAttribute($attr);
-                    $object = (isset($dec->objects[$ref])) ? $dec->objects[$ref] : null;
+                    $object = $dec->objects[$ref] ?? null;
 
                     if (!isset($object)) {
                         $object = $dec->lookup($ref);
@@ -186,11 +193,7 @@ class mxCellCodec extends mxObjectCodec
                         $element = $dec->getElementById($ref);
 
                         if (isset($element)) {
-                            $decoder = mxCodecRegistry::$codecs[$element->nodeName];
-
-                            if (!isset($decoder)) {
-                                $decoder = $this;
-                            }
+                            $decoder = mxCodecRegistry::$codecs[$element->nodeName] ?? $this;
 
                             $object = $decoder->decode($dec, $element);
                         }
